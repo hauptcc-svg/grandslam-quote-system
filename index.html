@@ -181,6 +181,39 @@
     .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--grey-900); color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; z-index: 200; animation: toastIn 0.3s ease; }
     @keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
 
+    /* ── Branded PDF / Print ── */
+    .pdf-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.6); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .pdf-page { background: #fff; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; font-size: 12px; color: #222; box-shadow: 0 8px 32px rgba(0,0,0,0.3); border-radius: 4px; }
+    .pdf-header { background: #111827; color: #fff; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .pdf-logo { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: -0.3px; }
+    .pdf-logo span { color: #4CAF50; }
+    .pdf-doc-type { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
+    .pdf-accent { height: 4px; background: #1a8a3f; }
+    .pdf-body { padding: 24px; }
+    .pdf-section { margin-bottom: 20px; }
+    .pdf-section h3 { font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; color: #1a8a3f; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 2px solid #e8f5e9; text-transform: uppercase; letter-spacing: 0.5px; }
+    .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+    .pdf-table td { padding: 6px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+    .pdf-table td:first-child { font-weight: 600; color: #555; width: 140px; font-size: 11px; }
+    .pdf-table td:last-child { font-size: 12px; }
+    .pdf-line-items { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+    .pdf-line-items th { background: #f5f5f5; padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #666; border-bottom: 2px solid #ddd; }
+    .pdf-line-items td { padding: 7px 10px; border-bottom: 1px solid #eee; font-size: 11px; }
+    .pdf-line-items .total-row td { font-weight: 700; font-size: 13px; border-top: 2px solid #1a8a3f; padding-top: 10px; }
+    .pdf-total { text-align: right; margin-top: 12px; }
+    .pdf-total-amount { font-family: 'Montserrat', sans-serif; font-size: 22px; font-weight: 800; color: #1a8a3f; }
+    .pdf-footer { background: #f9fafb; border-top: 1px solid #e5e7eb; padding: 16px 24px; font-size: 10px; color: #888; }
+    .pdf-footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .pdf-footer h4 { font-size: 10px; font-weight: 700; color: #555; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
+    .pdf-actions { display: flex; gap: 8px; justify-content: flex-end; padding: 12px 24px; background: #f9fafb; border-top: 1px solid #e5e7eb; }
+    @media print {
+      body * { visibility: hidden; }
+      .pdf-overlay, .pdf-overlay * { visibility: visible; }
+      .pdf-overlay { position: absolute; top:0; left:0; background: #fff; padding: 0; }
+      .pdf-page { max-width: 100%; max-height: none; box-shadow: none; border-radius: 0; }
+      .pdf-actions { display: none; }
+    }
+
     @media (min-width: 600px) {
       .app { max-width: 600px; margin: 0 auto; }
       .court-grid { grid-template-columns: 1fr 1fr 1fr; }
@@ -773,10 +806,108 @@
       );
     }
 
+    // ── BRANDED QUOTE PDF ──
+    function BrandedQuotePDF({ quote, pricing, onClose }) {
+      const svc = pricing.services.find(s=>s.id===quote.service);
+      const cond = pricing.conditions.find(c=>c.id===quote.condition);
+      const prov = pricing.provinces.find(p=>p.id===quote.province);
+      const pt = pricing.projectTypes.find(p=>p.id===quote.projectType);
+      const ctNames = (quote.courtTypes||[]).map(ctId=>{const c=pricing.courtTypes.find(x=>x.id===ctId);return c?c.name:ctId;}).join(', ');
+      const q = quote.quote || {};
+      const zoneCols = quote.zoneColours || {};
+      const colourSummary = Object.entries(zoneCols).map(([zoneId, colourId])=>{
+        const col = (pricing.colourPalette||[]).find(c=>c.id===colourId);
+        const zones = pricing.courtZones[quote.courtTypes?.[0]] || [];
+        const zone = zones.find(z=>z.id===zoneId);
+        return col ? `${zone?.name||zoneId}: ${col.name}` : null;
+      }).filter(Boolean).join(' · ');
+      const extrasList = (quote.extras||[]).map(eid=>{const e=pricing.extras.find(x=>x.id===eid);return e?e.name:eid;}).join(', ');
+      const handlePrint = () => window.print();
+
+      return (
+        <div className="pdf-overlay" onClick={onClose}>
+          <div className="pdf-page" onClick={e=>e.stopPropagation()}>
+            <div className="pdf-header">
+              <div>
+                <div className="pdf-logo">🎾 GRAND <span>SLAM</span> SURFACING</div>
+                <div style={{fontSize:9,opacity:0.6,marginTop:2}}>Professional Sports Court Construction</div>
+              </div>
+              <div style={{textAlign:'right'}}>
+                <div className="pdf-doc-type">Quotation</div>
+                <div style={{fontSize:10,fontWeight:700}}>{quote.id}</div>
+                <div style={{fontSize:9,opacity:0.6}}>{new Date(quote.createdAt).toLocaleDateString('en-ZA',{day:'numeric',month:'long',year:'numeric'})}</div>
+              </div>
+            </div>
+            <div className="pdf-accent"></div>
+            <div className="pdf-body">
+              <div className="pdf-section"><h3>Client Details</h3>
+                <table className="pdf-table"><tbody>
+                  <tr><td>Client</td><td style={{fontWeight:700}}>{quote.name}</td></tr>
+                  {quote.contact && <tr><td>Contact Person</td><td>{quote.contact}</td></tr>}
+                  <tr><td>Phone</td><td>{quote.phone}</td></tr>
+                  {quote.email && <tr><td>Email</td><td>{quote.email}</td></tr>}
+                  {quote.address && <tr><td>Site Address</td><td>{quote.address}</td></tr>}
+                </tbody></table>
+              </div>
+              <div className="pdf-section"><h3>Project Scope</h3>
+                <table className="pdf-table"><tbody>
+                  <tr><td>Service</td><td>{svc?.name||quote.service}</td></tr>
+                  <tr><td>Court Types</td><td>{ctNames}</td></tr>
+                  <tr><td>Number of Courts</td><td>{q.totalCourts||'—'}</td></tr>
+                  <tr><td>Total Area</td><td>{q.totalArea?`${q.totalArea}m²`:'—'}</td></tr>
+                  <tr><td>Condition</td><td>{cond?.name||quote.condition}{cond?.multiplier>1?` (+${Math.round((cond.multiplier-1)*100)}%)`:''}</td></tr>
+                  <tr><td>Province</td><td>{prov?.name||quote.province}{prov?.surcharge>0?` (+${Math.round(prov.surcharge*100)}% surcharge)`:''}</td></tr>
+                  <tr><td>Project Type</td><td>{pt?.name||quote.projectType} — {pt?.warrantyYears||'—'}-year warranty</td></tr>
+                  {colourSummary && <tr><td>Colours</td><td>{colourSummary}</td></tr>}
+                  {extrasList && <tr><td>Extras</td><td>{extrasList}</td></tr>}
+                </tbody></table>
+              </div>
+              <div className="pdf-section"><h3>Quote Breakdown</h3>
+                <table className="pdf-line-items">
+                  <thead><tr><th>Item</th><th style={{textAlign:'right'}}>Amount (ZAR)</th></tr></thead>
+                  <tbody>
+                    {(q.breakdown||[]).map((b,i)=><tr key={i}><td>{b.label}</td><td style={{textAlign:'right',color:b.amount<0?'#d32f2f':'inherit'}}>{b.amount<0?'−':''}R{Math.abs(b.amount).toLocaleString()}</td></tr>)}
+                    <tr className="total-row"><td>Total (incl. 15% VAT)</td><td style={{textAlign:'right',color:'#1a8a3f'}}>R{(q.total||0).toLocaleString()}</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="pdf-section"><h3>Scope of Work</h3>
+                <p style={{fontSize:11,lineHeight:1.6,color:'#555'}}>
+                  {svc?.name||'Service'} of {ctNames} courts ({q.totalCourts||'—'} courts, {q.totalArea||'—'}m² total area). Includes surface preparation, acrylic application, line marking per relevant sport federation standards ({pt?.name||'—'} specifications, {pt?.warrantyYears||'—'}-year warranty). All work carried out by experienced Grand Slam Surfacing installation teams.
+                </p>
+              </div>
+              <div className="pdf-section"><h3>Exclusions</h3>
+                <ul style={{fontSize:11,lineHeight:1.6,color:'#555',paddingLeft:16}}>
+                  <li>Earthworks, drainage, or sub-base preparation unless explicitly quoted</li>
+                  <li>Electrical connections for lighting (by client's electrician)</li>
+                  <li>Perimeter fencing beyond court boundary unless specified</li>
+                  <li>Any work not explicitly listed in this quotation</li>
+                </ul>
+              </div>
+            </div>
+            <div className="pdf-footer">
+              <div className="pdf-footer-grid">
+                <div><h4>Payment Terms</h4><p>50% deposit on acceptance<br/>50% on completion</p></div>
+                <div><h4>Validity</h4><p>This quotation is valid for 30 days from date of issue</p></div>
+                <div><h4>Contact</h4><p>076 266 2010<br/>office@grandslamsurfacing.co.za</p></div>
+                <div><h4>Warranty</h4><p>{pt?.warrantyYears||'—'}-year warranty on workmanship and materials</p></div>
+              </div>
+              <p style={{marginTop:12,textAlign:'center'}}>Grand Slam Surfacing · 22 Amadada Leisure Village, Humewood, PE 6001</p>
+            </div>
+            <div className="pdf-actions">
+              <button className="btn btn-outline btn-sm" onClick={onClose}>Cancel</button>
+              <button className="btn btn-primary btn-sm" onClick={handlePrint}>🖨️ Print / Save PDF</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     // ── QUOTES DASHBOARD ──
     function QuotesDashboard({ quotes, pricing, onUpdateQuote, onDeleteQuote }) {
       const [filter, setFilter] = useState('all');
       const [handoverQuote, setHandoverQuote] = useState(null);
+      const [pdfQuote, setPdfQuote] = useState(null);
       const [toast, setToast] = useState(null);
 
       const filtered = filter==='all' ? quotes : quotes.filter(q=>q.status===filter);
@@ -808,6 +939,7 @@
       return (<div>
         {toast && <Toast msg={toast} onDone={()=>setToast(null)}/>}
         {handoverQuote && <HandoverModal quote={handoverQuote} pricing={pricing} onClose={()=>setHandoverQuote(null)} onConfirm={id=>{onUpdateQuote(id,{status:'handedover',handedOverAt:new Date().toISOString()});setToast('Handed over to site team! 🏗️');}}/>}
+        {pdfQuote && <BrandedQuotePDF quote={pdfQuote} pricing={pricing} onClose={()=>setPdfQuote(null)}/>}
 
         <div className="dash-stats">
           <div className="stat-card blue"><div className="stat-value">{stats.total}</div><div className="stat-label">Total Quotes</div></div>
@@ -862,6 +994,7 @@
               {q.status==='accepted' && <>
                 <button className="btn btn-sm btn-purple" onClick={()=>setHandoverQuote(q)}>🏗️ Handover to Site</button>
               </>}
+              {q.status!=='declined' && q.quote && <button className="btn btn-sm btn-outline" onClick={()=>setPdfQuote(q)} style={{borderColor:'var(--green)'}}>📄 PDF</button>}
               {q.status==='declined' && <span style={{fontSize:11,color:'var(--grey-500)'}}>Declined {formatDate(q.declinedAt)}</span>}
               {q.status==='handedover' && <span style={{fontSize:11,color:'#006064'}}>✅ Handed over {formatDate(q.handedOverAt)} · Site team notified</span>}
               <button className="btn btn-xs btn-ghost" style={{color:'var(--grey-500)',marginLeft:'auto'}} onClick={()=>{if(confirm('Delete this quote?'))onDeleteQuote(q.id);}}>🗑</button>
