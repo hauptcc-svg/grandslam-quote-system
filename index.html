@@ -932,7 +932,10 @@
 
       return (
         <div className="pdf-overlay" onClick={onClose}>
-          <div className="pdf-page" onClick={e=>e.stopPropagation()} style={{background:'#fff'}}>
+          <div className="pdf-page" onClick={e=>e.stopPropagation()} style={{background:'#fff',padding:40}}>
+            <h2 style={{color:'#0c4a6e'}}>Quote: {quote.id}</h2>
+            <p><strong>{quote.name}</strong> — R{(q.total||0).toLocaleString()}</p>
+            <hr/>
             {pdfContent}
             <div className="pdf-actions">
               <button className="btn btn-outline btn-sm" onClick={onClose} style={{borderColor:'#0c4a6e',color:'#0c4a6e'}}>Cancel</button>
