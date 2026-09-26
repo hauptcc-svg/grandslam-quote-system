@@ -829,7 +829,7 @@
           {/* Header */}
           <div style={{background:'#0c4a6e',color:'#fff',padding:'16px 24px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
             <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
-              <div style={{background:\'#fff\',color:\'#0c4a6e\',width:\'32px\',height:\'32px\',borderRadius:\'50%\',display:\'flex\',alignItems:\'center\',justifyContent:\'center\',fontSize:\'16px\',fontWeight:800,fontFamily:"\'Montserrat\',sans-serif\'"}}>GS</div>
+              <div style={{background:'#fff',color:'#0c4a6e',width:'32px',height:'32px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'16px',fontWeight:800,fontFamily:'Montserrat,sans-serif'}}>GS</div>
               <div>
                 <div style={{fontFamily:"'Montserrat',sans-serif",fontWeight:800,fontSize:'16px'}}>GRAND SLAM SURFACING</div>
                 <div style={{fontSize:'8px',opacity:0.7}}>Professional Sports Court Construction</div>
@@ -930,19 +930,17 @@
         </div>
       );
 
-      return (
-        <div className="pdf-overlay" onClick={onClose}>
-          <div className="pdf-page" onClick={e=>e.stopPropagation()} style={{background:'#fff',padding:40}}>
-            <h2 style={{color:'#0c4a6e'}}>Quote: {quote.id}</h2>
-            <p><strong>{quote.name}</strong> — R{(q.total||0).toLocaleString()}</p>
-            <hr/>
-            {pdfContent}
-            <div className="pdf-actions">
-              <button className="btn btn-outline btn-sm" onClick={onClose} style={{borderColor:'#0c4a6e',color:'#0c4a6e'}}>Cancel</button>
-              <button className="btn btn-sm" onClick={handleExport} style={{background:'#0c4a6e',color:'#fff',border:'none'}}>🖨️ Print / Save PDF</button>
-            </div>
-          </div>
-        </div>
+      return React.createElement('div', {className:'pdf-overlay', onClick:onClose},
+        React.createElement('div', {className:'pdf-page', onClick:e=>e.stopPropagation(), style:{background:'#fff',padding:40}},
+          React.createElement('h2', {style:{color:'#0c4a6e'}}, 'Quote: '+quote.id),
+          React.createElement('p', null, React.createElement('strong', null, quote.name), ' — R'+(q.total||0).toLocaleString()),
+          React.createElement('hr'),
+          pdfContent,
+          React.createElement('div', {className:'pdf-actions'},
+            React.createElement('button', {className:'btn btn-outline btn-sm', onClick:onClose, style:{borderColor:'#0c4a6e',color:'#0c4a6e'}}, 'Cancel'),
+            React.createElement('button', {className:'btn btn-sm', onClick:handleExport, style:{background:'#0c4a6e',color:'#fff',border:'none'}}, '🖨️ Print / Save PDF')
+          )
+        )
       );
     }
 
