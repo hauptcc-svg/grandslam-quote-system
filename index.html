@@ -7,7 +7,6 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -190,22 +189,30 @@
     .pdf-logo-icon { background: #fff; color: #0c4a6e; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; font-family: 'Montserrat', sans-serif; }
     .pdf-doc-type { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.8; }
     .pdf-accent { height: 5px; background: linear-gradient(90deg, #0c4a6e, #1e3a8a, #0c4a6e); }
-    .pdf-body { padding: 28px; page-break-inside: avoid; }
-    .pdf-section { margin-bottom: 18px; page-break-inside: avoid; }
-    .pdf-section h3 { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; color: #0c4a6e; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 2px solid #e0e7ee; text-transform: uppercase; letter-spacing: 0.5px; }
-    .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
-    .pdf-table td { padding: 5px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
-    .pdf-table td:first-child { font-weight: 600; color: #555; width: 140px; font-size: 10px; }
-    .pdf-table td:last-child { font-size: 11px; font-weight: 500; }
-    .pdf-line-items { width: 100%; border-collapse: collapse; margin-bottom: 8px; page-break-inside: avoid; }
-    .pdf-line-items th { background: #f0f4f8; padding: 7px 10px; text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #0c4a6e; border-bottom: 2px solid #0c4a6e; }
-    .pdf-line-items td { padding: 6px 10px; border-bottom: 1px solid #eee; font-size: 11px; }
-    .pdf-line-items .total-row td { font-weight: 700; font-size: 13px; border-top: 2px solid #0c4a6e; padding-top: 8px; background: #f8fafc; }
-    .pdf-total-amount { font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 800; color: #0c4a6e; }
-    .pdf-footer { background: #f0f4f8; border-top: 1px solid #dde4ed; padding: 14px 28px; font-size: 9px; color: #555; page-break-inside: avoid; }
-    .pdf-footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .pdf-footer h4 { font-size: 9px; font-weight: 700; color: #0c4a6e; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px; }
+    .pdf-body { padding: 18px 24px; page-break-inside: avoid; }
+    .pdf-section { margin-bottom: 10px; page-break-inside: avoid; }
+    .pdf-section h3 { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700; color: #0c4a6e; margin-bottom: 5px; padding-bottom: 3px; border-bottom: 1.5px solid #e0e7ee; text-transform: uppercase; letter-spacing: 0.5px; }
+    .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+    .pdf-table td { padding: 3px 8px; border-bottom: 0.5px solid #f0f0f0; vertical-align: top; }
+    .pdf-table td:first-child { font-weight: 600; color: #555; width: 120px; font-size: 9px; }
+    .pdf-table td:last-child { font-size: 10px; font-weight: 500; }
+    .pdf-line-items { width: 100%; border-collapse: collapse; margin-bottom: 4px; page-break-inside: avoid; }
+    .pdf-line-items th { background: #f0f4f8; padding: 4px 8px; text-align: left; font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px; color: #0c4a6e; border-bottom: 1.5px solid #0c4a6e; }
+    .pdf-line-items td { padding: 3px 8px; border-bottom: 0.5px solid #eee; font-size: 9px; }
+    .pdf-line-items .total-row td { font-weight: 700; font-size: 10px; border-top: 2px solid #0c4a6e; padding-top: 5px; background: #f8fafc; }
+    .pdf-total-amount { font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 800; color: #0c4a6e; }
+    .pdf-footer { background: #f0f4f8; border-top: 1px solid #dde4ed; padding: 8px 24px; font-size: 8px; color: #555; page-break-inside: avoid; }
+    .pdf-footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+    .pdf-footer h4 { font-size: 8px; font-weight: 700; color: #0c4a6e; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px; }
     .pdf-actions { display: flex; gap: 8px; justify-content: flex-end; padding: 10px 28px; background: #f8fafc; border-top: 1px solid #e5e7eb; }
+    @media print {
+      @page { size: A4; margin: 10mm; }
+      body * { visibility: hidden; }
+      .pdf-overlay, .pdf-overlay * { visibility: visible; }
+      .pdf-overlay { position: absolute; top:0; left:0; background: #fff; padding: 0; width: 100%; }
+      .pdf-page { max-width: 100%; max-height: none; box-shadow: none; border-radius: 0; font-size: 10px; }
+      .pdf-actions { display: none; }
+    }
 
     @media (min-width: 600px) {
       .app { max-width: 600px; margin: 0 auto; }
@@ -815,26 +822,7 @@
         return col ? `${zone?.name||zoneId}: ${col.name}` : null;
       }).filter(Boolean).join(' · ');
       const extrasList = (quote.extras||[]).map(eid=>{const e=pricing.extras.find(x=>x.id===eid);return e?e.name:eid;}).join(', ');
-      const [exporting, setExporting] = useState(false);
-
-      const handleExport = () => {
-        setExporting(true);
-        const el = document.getElementById('pdf-export-content');
-        const opt = {
-          margin: [10, 10, 10, 10],
-          filename: `GrandSlam_Quote_${quote.id}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-        };
-        if (typeof html2pdf === 'function') {
-          html2pdf().set(opt).from(el).save().then(() => setExporting(false));
-        } else {
-          setExporting(false);
-          window.print();
-        }
-      };
+      const handleExport = () => window.print();
 
       const pdfContent = (
         <div id="pdf-export-content" style={{background:'#fff',fontFamily:"'Inter',-apple-system,sans-serif",color:'#111',fontSize:'11px',lineHeight:1.5}}>
@@ -948,9 +936,7 @@
             {pdfContent}
             <div className="pdf-actions">
               <button className="btn btn-outline btn-sm" onClick={onClose} style={{borderColor:'#0c4a6e',color:'#0c4a6e'}}>Cancel</button>
-              <button className="btn btn-sm" onClick={handleExport} disabled={exporting} style={{background:'#0c4a6e',color:'#fff',border:'none'}}>
-                {exporting ? '⏳ Generating...' : '📥 Download PDF'}
-              </button>
+              <button className="btn btn-sm" onClick={handleExport} style={{background:'#0c4a6e',color:'#fff',border:'none'}}>🖨️ Print / Save PDF</button>
             </div>
           </div>
         </div>
