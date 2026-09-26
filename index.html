@@ -11,24 +11,22 @@
   <style>
     :root {
       --green: #1a8a3f; --green-dark: #0f5c28; --green-light: #e8f5e9;
-      --orange: #f57c00; --red: #d32f2f; --grey-50: #f9fafb;
-      --grey-100: #f3f4f6; --grey-200: #e5e7eb; --grey-300: #d1d5db;
+      --orange: #f57c00; --orange-light: #fff3e0; --red: #d32f2f; --red-light: #ffebee;
+      --blue: #1565c0; --blue-light: #e3f2fd; --purple: #7b1fa2; --purple-light: #f3e5f5;
+      --grey-50: #f9fafb; --grey-100: #f3f4f6; --grey-200: #e5e7eb; --grey-300: #d1d5db;
       --grey-500: #6b7280; --grey-700: #374151; --grey-900: #111827;
-      --white: #ffffff; --shadow: 0 1px 3px rgba(0,0,0,0.1);
-      --radius: 8px;
+      --white: #ffffff; --radius: 8px;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', -apple-system, sans-serif; background: var(--grey-50); color: var(--grey-900); -webkit-font-smoothing: antialiased; }
-    
-    /* ── MOBILE FIRST: 320px ── */
-    .app { max-width: 100%; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
-    .header { background: var(--green); color: var(--white); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .header-logo { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; line-height: 1.2; letter-spacing: -0.3px; }
-    .header-badge { font-size: 10px; background: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 12px; white-space: nowrap; }
-    .header-actions { display: flex; gap: 6px; }
-    .btn { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: var(--radius); border: none; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+    .app { max-width: 100%; min-height: 100vh; display: flex; flex-direction: column; }
+    .header { background: var(--green); color: var(--white); padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+    .header-logo { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; line-height: 1.2; flex:1; }
+    .header-sub { font-size: 10px; opacity: 0.8; }
+    .badge { font-size: 10px; padding: 3px 8px; border-radius: 12px; font-weight: 600; white-space: nowrap; }
+    .btn { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: var(--radius); border: none; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px; }
     .btn-sm { font-size: 11px; padding: 5px 10px; }
-    .btn-xs { font-size: 10px; padding: 3px 8px; border-radius: 4px; }
+    .btn-xs { font-size: 10px; padding: 3px 7px; border-radius: 4px; }
     .btn-primary { background: var(--green); color: var(--white); }
     .btn-primary:hover { background: var(--green-dark); }
     .btn-outline { background: var(--white); color: var(--green); border: 1.5px solid var(--green); }
@@ -37,108 +35,151 @@
     .btn-ghost:hover { background: rgba(255,255,255,0.15); }
     .btn-danger { background: var(--red); color: var(--white); }
     .btn-orange { background: var(--orange); color: var(--white); }
+    .btn-blue { background: var(--blue); color: var(--white); }
+    .btn-purple { background: var(--purple); color: var(--white); }
 
-    /* Steps indicator */
-    .steps { display: flex; background: var(--white); border-bottom: 1px solid var(--grey-200); padding: 0; }
-    .step { flex: 1; text-align: center; padding: 12px 4px; font-size: 10px; font-weight: 600; color: var(--grey-500); position: relative; cursor: pointer; transition: color 0.2s; }
+    /* Bottom nav */
+    .bottom-nav { display: flex; background: var(--white); border-top: 2px solid var(--grey-200); position: sticky; bottom: 0; z-index: 50; }
+    .nav-item { flex: 1; text-align: center; padding: 10px 4px; font-size: 10px; font-weight: 600; color: var(--grey-500); cursor: pointer; border: none; background: none; font-family: 'Inter', sans-serif; transition: all 0.15s; }
+    .nav-item.active { color: var(--green); }
+    .nav-item .icon { font-size: 20px; display: block; margin-bottom: 2px; }
+    .nav-count { background: var(--red); color: white; font-size: 9px; padding: 1px 5px; border-radius: 8px; position: relative; top: -6px; margin-left: -4px; }
+
+    /* Steps */
+    .steps { display: flex; background: var(--white); border-bottom: 1px solid var(--grey-200); }
+    .step { flex: 1; text-align: center; padding: 10px 4px; font-size: 9px; font-weight: 600; color: var(--grey-500); position: relative; cursor: pointer; }
     .step.active { color: var(--green); }
     .step.done { color: var(--green-dark); }
     .step::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: transparent; transition: background 0.2s; }
     .step.active::after { background: var(--green); }
     .step.done::after { background: var(--green-light); }
-    .step-num { display: block; width: 22px; height: 22px; border-radius: 50%; background: var(--grey-200); color: var(--grey-500); font-size: 11px; font-weight: 700; line-height: 22px; margin: 0 auto 4px; transition: all 0.2s; }
+    .step-num { display: block; width: 20px; height: 20px; border-radius: 50%; background: var(--grey-200); color: var(--grey-500); font-size: 10px; font-weight: 700; line-height: 20px; margin: 0 auto 3px; }
     .step.active .step-num { background: var(--green); color: white; }
     .step.done .step-num { background: var(--green-light); color: var(--green-dark); }
 
-    /* Main content */
     .content { flex: 1; padding: 16px; overflow-y: auto; }
-
-    /* Form elements */
-    .form-group { margin-bottom: 16px; }
-    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--grey-700); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
-    .form-select, .form-input { width: 100%; padding: 10px 12px; font-family: 'Inter', sans-serif; font-size: 14px; border: 1.5px solid var(--grey-300); border-radius: var(--radius); background: var(--white); color: var(--grey-900); appearance: none; -webkit-appearance: none; }
-    .form-select { background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 11px; font-weight: 600; color: var(--grey-700); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .form-select, .form-input { width: 100%; padding: 10px 12px; font-family: 'Inter', sans-serif; font-size: 14px; border: 1.5px solid var(--grey-300); border-radius: var(--radius); background: var(--white); color: var(--grey-900); }
+    .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
     .form-input:focus, .form-select:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(26,138,63,0.1); }
+    textarea.form-input { resize: vertical; }
 
-    /* Court type tiles */
     .court-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .court-tile { border: 2px solid var(--grey-200); border-radius: var(--radius); padding: 12px 10px; text-align: center; cursor: pointer; transition: all 0.15s; background: var(--white); font-size: 12px; font-weight: 600; }
+    .court-tile { border: 2px solid var(--grey-200); border-radius: var(--radius); padding: 11px 8px; text-align: center; cursor: pointer; transition: all 0.15s; background: var(--white); font-size: 11px; font-weight: 600; }
     .court-tile.selected { border-color: var(--green); background: var(--green-light); color: var(--green-dark); }
-    .court-tile-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+    .court-tile-icon { font-size: 22px; display: block; margin-bottom: 3px; }
 
-    /* Condition cards */
     .condition-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-    .condition-card { border: 2px solid var(--grey-200); border-radius: var(--radius); padding: 14px 8px; text-align: center; cursor: pointer; transition: all 0.15s; background: var(--white); }
+    .condition-card { border: 2px solid var(--grey-200); border-radius: var(--radius); padding: 12px 6px; text-align: center; cursor: pointer; transition: all 0.15s; background: var(--white); }
     .condition-card.selected { border-color: var(--green); background: var(--green-light); }
-    .condition-card .icon { font-size: 28px; display: block; margin-bottom: 4px; }
-    .condition-card .label { font-size: 11px; font-weight: 600; }
+    .condition-card .icon { font-size: 26px; display: block; margin-bottom: 3px; }
+    .condition-card .label { font-size: 10px; font-weight: 600; }
     .condition-card .hint { font-size: 9px; color: var(--grey-500); margin-top: 2px; }
 
-    /* Extras */
     .extra-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; border: 1.5px solid var(--grey-200); border-radius: var(--radius); margin-bottom: 8px; background: var(--white); cursor: pointer; transition: all 0.15s; }
     .extra-row.selected { border-color: var(--green); background: var(--green-light); }
     .extra-info { display: flex; align-items: center; gap: 10px; }
-    .extra-icon { font-size: 22px; }
+    .extra-icon { font-size: 20px; }
     .extra-name { font-size: 13px; font-weight: 600; }
     .extra-price { font-size: 12px; font-weight: 700; color: var(--green-dark); }
-    .extra-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--grey-300); display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.15s; }
+    .extra-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--grey-300); display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.15s; flex-shrink: 0; }
     .extra-row.selected .extra-check { background: var(--green); border-color: var(--green); color: white; }
 
-    /* Price summary */
-    .price-card { background: var(--white); border: 2px solid var(--green); border-radius: var(--radius); padding: 16px; margin-top: 16px; }
-    .price-estimate { font-family: 'Montserrat', sans-serif; font-size: 28px; font-weight: 800; color: var(--green-dark); text-align: center; }
-    .price-label { font-size: 11px; color: var(--grey-500); text-align: center; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .price-card { background: var(--white); border: 2px solid var(--green); border-radius: var(--radius); padding: 14px; margin-top: 14px; }
+    .price-estimate { font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 800; color: var(--green-dark); text-align: center; }
+    .price-label { font-size: 10px; color: var(--grey-500); text-align: center; margin-bottom: 4px; text-transform: uppercase; }
     .price-note { font-size: 10px; color: var(--grey-500); text-align: center; margin-top: 4px; }
-    .price-line { display: flex; justify-content: space-between; padding: 6px 0; font-size: 12px; border-bottom: 1px solid var(--grey-100); }
-    .price-line:last-child { border-bottom: none; font-weight: 700; font-size: 13px; }
+    .price-line { display: flex; justify-content: space-between; padding: 4px 0; font-size: 11px; border-bottom: 1px solid var(--grey-100); }
+    .price-line:last-child { border-bottom: none; font-weight: 700; font-size: 12px; }
 
-    /* Navigation buttons */
     .nav-buttons { display: flex; gap: 8px; padding: 16px; background: var(--white); border-top: 1px solid var(--grey-200); }
     .nav-buttons .btn { flex: 1; justify-content: center; }
 
     /* ── ADMIN PANEL ── */
-    .admin { display: none; background: var(--white); }
-    .admin.visible { display: block; }
-    .admin-section { padding: 16px; border-bottom: 1px solid var(--grey-200); }
-    .admin-section h3 { font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 10px; color: var(--grey-900); display: flex; align-items: center; gap: 8px; }
-    .admin-section h3 .icon { font-size: 18px; }
-    .admin-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    .admin-table th { text-align: left; padding: 8px 6px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.3px; color: var(--grey-500); border-bottom: 2px solid var(--grey-200); }
-    .admin-table td { padding: 6px; border-bottom: 1px solid var(--grey-100); }
-    .admin-table input, .admin-table select { width: 100%; padding: 6px 8px; font-size: 12px; border: 1.5px solid var(--grey-300); border-radius: 4px; font-family: 'Inter', sans-serif; }
-    .admin-table input:focus, .admin-table select:focus { outline: none; border-color: var(--green); }
-    .admin-table input[type="number"] { width: 70px; text-align: right; }
+    .admin-section { padding: 14px; border-bottom: 1px solid var(--grey-200); }
+    .admin-section h3 { font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .admin-table th { text-align: left; padding: 6px 5px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.3px; color: var(--grey-500); border-bottom: 2px solid var(--grey-200); }
+    .admin-table td { padding: 5px; border-bottom: 1px solid var(--grey-100); }
+    .admin-table input, .admin-table select { width: 100%; padding: 5px 7px; font-size: 11px; border: 1.5px solid var(--grey-300); border-radius: 4px; font-family: 'Inter', sans-serif; }
+    .admin-table input:focus { outline: none; border-color: var(--green); }
+    .admin-table input[type="number"] { width: 60px; text-align: right; }
     .admin-add-btn { margin-top: 8px; }
-    .admin-toggle { position: fixed; bottom: 16px; right: 16px; z-index: 100; width: 44px; height: 44px; border-radius: 50%; background: var(--grey-900); color: white; border: none; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; }
-    .admin-badge { background: var(--orange); color: white; font-size: 9px; padding: 2px 6px; border-radius: 8px; font-weight: 700; }
 
-    /* Tablet: 600px+ */
+    /* ── DASHBOARD ── */
+    .dash-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .stat-card { background: var(--white); border-radius: var(--radius); padding: 12px; text-align: center; border: 1px solid var(--grey-200); }
+    .stat-value { font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 800; }
+    .stat-label { font-size: 10px; color: var(--grey-500); text-transform: uppercase; margin-top: 2px; }
+    .stat-card.green .stat-value { color: var(--green-dark); }
+    .stat-card.orange .stat-value { color: var(--orange); }
+    .stat-card.blue .stat-value { color: var(--blue); }
+    .stat-card.red .stat-value { color: var(--red); }
+
+    .quote-card { background: var(--white); border: 1px solid var(--grey-200); border-radius: var(--radius); padding: 12px; margin-bottom: 10px; transition: all 0.15s; }
+    .quote-card:hover { border-color: var(--green); }
+    .quote-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .quote-client { font-weight: 700; font-size: 14px; }
+    .quote-org { font-size: 11px; color: var(--grey-500); }
+    .quote-amount { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 16px; color: var(--green-dark); text-align: right; }
+    .quote-meta { display: flex; gap: 8px; flex-wrap: wrap; font-size: 10px; color: var(--grey-500); margin-bottom: 8px; }
+    .quote-meta span { background: var(--grey-100); padding: 2px 8px; border-radius: 10px; }
+    .quote-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .status-badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 10px; text-transform: uppercase; }
+    .status-draft { background: var(--grey-200); color: var(--grey-700); }
+    .status-sent { background: var(--blue-light); color: var(--blue); }
+    .status-viewed { background: var(--purple-light); color: var(--purple); }
+    .status-followup { background: var(--orange-light); color: var(--orange); }
+    .status-accepted { background: var(--green-light); color: var(--green-dark); }
+    .status-declined { background: var(--red-light); color: var(--red); }
+    .status-handedover { background: #e0f7fa; color: #006064; }
+
+    .followup-alert { background: var(--orange-light); border-left: 3px solid var(--orange); padding: 8px 12px; border-radius: 0 var(--radius) var(--radius) 0; margin-top: 8px; font-size: 11px; }
+
+    /* Spec Pack / Handover */
+    .spec-section { margin-bottom: 14px; }
+    .spec-section h4 { font-size: 12px; font-weight: 700; color: var(--grey-700); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .spec-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px; }
+    .spec-table th { text-align: left; padding: 6px 8px; background: var(--grey-100); font-size: 10px; font-weight: 600; }
+    .spec-table td { padding: 6px 8px; border-bottom: 1px solid var(--grey-200); }
+    .checklist-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 12px; border-bottom: 1px solid var(--grey-100); }
+    .checklist-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--green); }
+
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--grey-500); }
+    .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: flex-end; justify-content: center; }
+    .modal { background: var(--white); border-radius: 16px 16px 0 0; width: 100%; max-height: 90vh; overflow-y: auto; padding: 20px 16px; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .modal-title { font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 800; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--grey-900); color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; z-index: 200; animation: toastIn 0.3s ease; }
+    @keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+
     @media (min-width: 600px) {
-      .app { max-width: 600px; }
+      .app { max-width: 600px; margin: 0 auto; }
       .court-grid { grid-template-columns: 1fr 1fr 1fr; }
-      .header { padding: 16px 24px; }
-      .header-logo { font-size: 18px; }
-      .content { padding: 24px; }
-      .steps { padding: 0 24px; }
-      .step { font-size: 11px; }
-      .nav-buttons { padding: 16px 24px; }
-      .price-estimate { font-size: 32px; }
+      .header { padding: 14px 24px; }
+      .header-logo { font-size: 16px; }
+      .content { padding: 20px; }
+      .dash-stats { grid-template-columns: repeat(4, 1fr); }
+      .price-estimate { font-size: 30px; }
     }
-    /* Desktop: 960px+ */
     @media (min-width: 960px) {
       .app { max-width: 800px; border-left: 1px solid var(--grey-200); border-right: 1px solid var(--grey-200); }
-      .content { padding: 32px; }
-      .court-grid { grid-template-columns: repeat(3, 1fr); }
-      .condition-grid { grid-template-columns: repeat(3, 1fr); }
+      .content { padding: 24px; }
     }
   </style>
 </head>
 <body>
   <div id="root"></div>
   <script type="text/babel">
-    const { useState, useEffect, useCallback, useMemo } = React;
+    const { useState, useEffect, useMemo, useCallback } = React;
 
-    // ── DEFAULT PRICING (editable by owner) ──
+    // ── DEFAULT PRICING ──
     const DEFAULT_PRICING = {
       services: [
         { id: 'resurface', name: 'Court Resurfacing', baseRate: 280, unit: 'per m²' },
@@ -187,488 +228,376 @@
     function calculatePrice(selections, pricing) {
       const { service, courtTypes, courtCount, condition, province, extras } = selections;
       if (!service || !courtTypes.length || !condition || !province) return null;
-
       const svc = pricing.services.find(s => s.id === service);
       const cond = pricing.conditions.find(c => c.id === condition);
       const prov = pricing.provinces.find(p => p.id === province);
-
-      // Calculate area
-      let totalArea = 0;
-      let courtBreakdown = [];
+      let totalArea = 0, courtBreakdown = [];
       courtTypes.forEach(ctId => {
         const ct = pricing.courtTypes.find(c => c.id === ctId);
-        if (ct) {
-          const area = ct.areaM2 * (parseInt(courtCount) || 1);
-          totalArea += area;
-          courtBreakdown.push({ name: ct.name, count: parseInt(courtCount) || 1, areaPer: ct.areaM2, totalArea: area });
-        }
+        if (ct) { const a = ct.areaM2 * (parseInt(courtCount) || 1); totalArea += a; courtBreakdown.push({ name: ct.name, icon: ct.icon, count: parseInt(courtCount)||1, areaPer: ct.areaM2, totalArea: a }); }
       });
-
-      // Base price
       let subtotal = svc.baseRate * totalArea;
-      const breakdown = [];
-
-      breakdown.push({ label: `${svc.name} (${totalArea}m² × R${svc.baseRate}/m²)`, amount: subtotal });
-
-      // Condition
-      if (cond.multiplier !== 1.0) {
-        const condAmount = subtotal * (cond.multiplier - 1);
-        subtotal = subtotal * cond.multiplier;
-        breakdown.push({ label: `Condition: ${cond.name} (${Math.round((cond.multiplier-1)*100)}% extra)`, amount: condAmount });
-      }
-
-      // Province surcharge
-      if (prov.surcharge > 0) {
-        const surchAmount = subtotal * prov.surcharge;
-        subtotal += surchAmount;
-        breakdown.push({ label: `Province surcharge: ${prov.name} (${Math.round(prov.surcharge*100)}%)`, amount: Math.round(surchAmount) });
-      }
-
-      // Volume discount (5+ courts)
-      const totalCourts = (parseInt(courtCount) || 1) * courtTypes.length;
-      let volumeDiscount = 0;
-      if (totalCourts >= 5) {
-        volumeDiscount = Math.round(subtotal * 0.07);
-        breakdown.push({ label: `Volume discount (${totalCourts} courts, 7% off)`, amount: -volumeDiscount });
-      }
-
-      // Extras
-      let extrasTotal = 0;
-      extras.forEach(extId => {
-        const ext = pricing.extras.find(e => e.id === extId);
-        if (ext) {
-          const extCost = ext.price * totalCourts;
-          extrasTotal += extCost;
-          breakdown.push({ label: `${ext.name} (${totalCourts} × R${ext.price.toLocaleString()})`, amount: extCost });
-        }
-      });
-
-      const preVat = subtotal - volumeDiscount + extrasTotal;
-      const vat = Math.round(preVat * 0.15);
-      const total = preVat + vat;
-
-      return {
-        subtotal: Math.round(subtotal),
-        volumeDiscount,
-        extrasTotal,
-        preVat: Math.round(preVat),
-        vat,
-        total,
-        totalCourts,
-        totalArea,
-        breakdown,
-        courtBreakdown,
-      };
+      const breakdown = [{ label: `${svc.name} (${totalArea}m² × R${svc.baseRate}/m²)`, amount: subtotal }];
+      if (cond.multiplier !== 1.0) { const ca = subtotal * (cond.multiplier-1); subtotal *= cond.multiplier; breakdown.push({ label: `Condition: ${cond.name} (+${Math.round((cond.multiplier-1)*100)}%)`, amount: Math.round(ca) }); }
+      if (prov.surcharge > 0) { const sa = subtotal * prov.surcharge; subtotal += sa; breakdown.push({ label: `Province: ${prov.name} (+${Math.round(prov.surcharge*100)}%)`, amount: Math.round(sa) }); }
+      const totalCourts = (parseInt(courtCount)||1) * courtTypes.length;
+      let vd = 0;
+      if (totalCourts >= 5) { vd = Math.round(subtotal * 0.07); breakdown.push({ label: `Volume discount (${totalCourts} courts, 7%)`, amount: -vd }); }
+      let et=0; extras.forEach(eid => { const ex = pricing.extras.find(e=>e.id===eid); if(ex){ const ec=ex.price*totalCourts; et+=ec; breakdown.push({label:`${ex.name} (${totalCourts}× R${ex.price.toLocaleString()})`,amount:ec});}});
+      const pv = subtotal-vd+et, vat = Math.round(pv*0.15), total = pv+vat;
+      return { subtotal:Math.round(subtotal), volumeDiscount:vd, extrasTotal:et, preVat:Math.round(pv), vat, total, totalCourts, totalArea, breakdown, courtBreakdown };
     }
 
-    // ── LOCAL STORAGE HELPERS ──
-    const STORAGE_KEY = 'grandslam_pricing';
-    function loadPricing() {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        return saved ? JSON.parse(saved) : DEFAULT_PRICING;
-      } catch { return DEFAULT_PRICING; }
-    }
-    function savePricing(pricing) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(pricing));
-    }
+    // ── STORAGE HELPERS ──
+    const PK = 'grandslam_pricing', QK = 'grandslam_quotes';
+    function loadPricing() { try { const s=localStorage.getItem(PK); return s?JSON.parse(s):DEFAULT_PRICING; } catch{ return DEFAULT_PRICING; } }
+    function savePricing(p) { localStorage.setItem(PK, JSON.stringify(p)); }
+    function loadQuotes() { try { const s=localStorage.getItem(QK); return s?JSON.parse(s):[]; } catch{ return []; } }
+    function saveQuotes(q) { localStorage.setItem(QK, JSON.stringify(q)); }
+
+    const STATUS_FLOW = ['draft', 'sent', 'viewed', 'accepted', 'declined'];
+    const STATUS_LABELS = {
+      draft: 'Draft', sent: 'Sent', viewed: 'Viewed', followup: 'Follow-up', accepted: 'Accepted ✅', declined: 'Declined ❌', handedover: 'Handed Over 🏗️'
+    };
+    const STATUS_CLASS = {
+      draft:'status-draft', sent:'status-sent', viewed:'status-viewed', followup:'status-followup', accepted:'status-accepted', declined:'status-declined', handedover:'status-handedover'
+    };
+
+    function generateId() { return 'Q-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2,4).toUpperCase(); }
+
+    // ── TOAST ──
+    function Toast({ msg, onDone }) { useEffect(() => { const t = setTimeout(onDone, 2500); return () => clearTimeout(t); }, []); return <div className="toast">{msg}</div>; }
 
     // ── ADMIN PANEL ──
-    function AdminPanel({ pricing, onUpdate, onClose }) {
-      const updateService = (idx, field, value) => {
-        const svcs = [...pricing.services];
-        svcs[idx] = { ...svcs[idx], [field]: field === 'baseRate' ? parseFloat(value) || 0 : value };
-        onUpdate({ ...pricing, services: svcs });
-      };
-      const updateCourtType = (idx, field, value) => {
-        const cts = [...pricing.courtTypes];
-        cts[idx] = { ...cts[idx], [field]: field === 'areaM2' ? parseInt(value) || 0 : value };
-        onUpdate({ ...pricing, courtTypes: cts });
-      };
-      const updateCondition = (idx, field, value) => {
-        const conds = [...pricing.conditions];
-        conds[idx] = { ...conds[idx], [field]: field === 'multiplier' ? parseFloat(value) || 1.0 : value };
-        onUpdate({ ...pricing, conditions: conds });
-      };
-      const updateProvince = (idx, field, value) => {
-        const provs = [...pricing.provinces];
-        provs[idx] = { ...provs[idx], [field]: field === 'surcharge' ? parseFloat(value) || 0 : value };
-        onUpdate({ ...pricing, provinces: provs });
-      };
-      const updateExtra = (idx, field, value) => {
-        const exts = [...pricing.extras];
-        exts[idx] = { ...exts[idx], [field]: field === 'price' ? parseInt(value) || 0 : value };
-        onUpdate({ ...pricing, extras: exts });
-      };
-      const addExtra = () => {
-        const newId = 'extra_' + Date.now();
-        onUpdate({ ...pricing, extras: [...pricing.extras, { id: newId, name: 'New Extra', price: 0, unit: 'per court', icon: '📦' }] });
-      };
-      const removeExtra = (idx) => {
-        const exts = pricing.extras.filter((_, i) => i !== idx);
-        onUpdate({ ...pricing, extras: exts });
-      };
+    function AdminPanel({ pricing, onUpdate }) {
+      const us=(i,f,v)=>{const a=[...pricing.services];a[i]={...a[i],[f]:f==='baseRate'?parseFloat(v)||0:v};onUpdate({...pricing,services:a});};
+      const uct=(i,f,v)=>{const a=[...pricing.courtTypes];a[i]={...a[i],[f]:f==='areaM2'?parseInt(v)||0:v};onUpdate({...pricing,courtTypes:a});};
+      const uc=(i,f,v)=>{const a=[...pricing.conditions];a[i]={...a[i],[f]:f==='multiplier'?parseFloat(v)||1:v};onUpdate({...pricing,conditions:a});};
+      const up=(i,f,v)=>{const a=[...pricing.provinces];a[i]={...a[i],[f]:f==='surcharge'?parseFloat(v)||0:v};onUpdate({...pricing,provinces:a});};
+      const ue=(i,f,v)=>{const a=[...pricing.extras];a[i]={...a[i],[f]:f==='price'?parseInt(v)||0:v};onUpdate({...pricing,extras:a});};
+      const ae=()=>{onUpdate({...pricing,extras:[...pricing.extras,{id:'ex_'+Date.now(),name:'New Extra',price:0,unit:'per court',icon:'📦'}]});};
+      const re=i=>{const a=pricing.extras.filter((_,j)=>j!==i);onUpdate({...pricing,extras:a});};
 
       return (
-        <div className="admin visible">
+        <div>
           <div className="header" style={{background:'var(--grey-900)'}}>
-            <div>
-              <div className="header-logo">⚙️ Pricing Admin</div>
-              <div style={{fontSize:10,opacity:0.7}}>Edit & save — changes apply instantly to quotes</div>
-            </div>
-            <button className="btn btn-ghost btn-sm" onClick={onClose}>✕ Close</button>
+            <div><div className="header-logo">⚙️ Pricing Admin</div><div className="header-sub">Changes save instantly & apply to all quotes</div></div>
           </div>
-
-          {/* Services */}
-          <div className="admin-section">
-            <h3><span className="icon">📋</span> Services & Base Rates</h3>
-            <table className="admin-table">
-              <thead><tr><th>Service</th><th>Base Rate (R/m²)</th></tr></thead>
-              <tbody>
-                {pricing.services.map((s, i) => (
-                  <tr key={s.id}>
-                    <td><input value={s.name} onChange={e => updateService(i, 'name', e.target.value)} /></td>
-                    <td><input type="number" value={s.baseRate} onChange={e => updateService(i, 'baseRate', e.target.value)} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="admin-section"><h3>📋 Services & Base Rates</h3>
+            <table className="admin-table"><thead><tr><th>Service</th><th>Rate (R/m²)</th></tr></thead><tbody>
+              {pricing.services.map((s,i)=><tr key={s.id}><td><input value={s.name} onChange={e=>us(i,'name',e.target.value)}/></td><td><input type="number" value={s.baseRate} onChange={e=>us(i,'baseRate',e.target.value)}/></td></tr>)}
+            </tbody></table>
           </div>
-
-          {/* Court Types */}
-          <div className="admin-section">
-            <h3><span className="icon">🏟️</span> Court Types & Sizes</h3>
-            <table className="admin-table">
-              <thead><tr><th>Court</th><th>Icon</th><th>Area (m²)</th></tr></thead>
-              <tbody>
-                {pricing.courtTypes.map((ct, i) => (
-                  <tr key={ct.id}>
-                    <td><input value={ct.name} onChange={e => updateCourtType(i, 'name', e.target.value)} /></td>
-                    <td><input value={ct.icon} style={{width:40,textAlign:'center'}} onChange={e => updateCourtType(i, 'icon', e.target.value)} /></td>
-                    <td><input type="number" value={ct.areaM2} onChange={e => updateCourtType(i, 'areaM2', e.target.value)} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="admin-section"><h3>🏟️ Court Types</h3>
+            <table className="admin-table"><thead><tr><th>Court</th><th>Icon</th><th>Area (m²)</th></tr></thead><tbody>
+              {pricing.courtTypes.map((ct,i)=><tr key={ct.id}><td><input value={ct.name} onChange={e=>uct(i,'name',e.target.value)}/></td><td><input value={ct.icon} style={{width:40,textAlign:'center'}} onChange={e=>uct(i,'icon',e.target.value)}/></td><td><input type="number" value={ct.areaM2} onChange={e=>uct(i,'areaM2',e.target.value)}/></td></tr>)}
+            </tbody></table>
           </div>
-
-          {/* Conditions */}
-          <div className="admin-section">
-            <h3><span className="icon">🔍</span> Condition Multipliers</h3>
-            <table className="admin-table">
-              <thead><tr><th>Condition</th><th>Multiplier</th><th>Hint</th></tr></thead>
-              <tbody>
-                {pricing.conditions.map((c, i) => (
-                  <tr key={c.id}>
-                    <td><input value={c.name} onChange={e => updateCondition(i, 'name', e.target.value)} /></td>
-                    <td><input type="number" step="0.01" value={c.multiplier} onChange={e => updateCondition(i, 'multiplier', e.target.value)} /></td>
-                    <td><input value={c.hint} onChange={e => updateCondition(i, 'hint', e.target.value)} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="admin-section"><h3>🔍 Condition Multipliers</h3>
+            <table className="admin-table"><thead><tr><th>Condition</th><th>Multiplier</th><th>Hint</th></tr></thead><tbody>
+              {pricing.conditions.map((c,i)=><tr key={c.id}><td><input value={c.name} onChange={e=>uc(i,'name',e.target.value)}/></td><td><input type="number" step="0.01" value={c.multiplier} onChange={e=>uc(i,'multiplier',e.target.value)}/></td><td><input value={c.hint} onChange={e=>uc(i,'hint',e.target.value)}/></td></tr>)}
+            </tbody></table>
           </div>
-
-          {/* Provinces */}
-          <div className="admin-section">
-            <h3><span className="icon">🗺️</span> Province Surcharges</h3>
-            <table className="admin-table">
-              <thead><tr><th>Province</th><th>Surcharge %</th></tr></thead>
-              <tbody>
-                {pricing.provinces.map((p, i) => (
-                  <tr key={p.id}>
-                    <td><input value={p.name} onChange={e => updateProvince(i, 'name', e.target.value)} /></td>
-                    <td><input type="number" step="0.01" value={p.surcharge} onChange={e => updateProvince(i, 'surcharge', e.target.value)} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="admin-section"><h3>🗺️ Province Surcharges</h3>
+            <table className="admin-table"><thead><tr><th>Province</th><th>Surcharge</th></tr></thead><tbody>
+              {pricing.provinces.map((p,i)=><tr key={p.id}><td><input value={p.name} onChange={e=>up(i,'name',e.target.value)}/></td><td><input type="number" step="0.01" value={p.surcharge} onChange={e=>up(i,'surcharge',e.target.value)}/></td></tr>)}
+            </tbody></table>
           </div>
-
-          {/* Extras */}
-          <div className="admin-section">
-            <h3><span className="icon">🔧</span> Extras & Add-ons</h3>
-            <table className="admin-table">
-              <thead><tr><th>Name</th><th>Price (R)</th><th>Unit</th><th></th></tr></thead>
-              <tbody>
-                {pricing.extras.map((e, i) => (
-                  <tr key={e.id}>
-                    <td><input value={e.name} onChange={ev => updateExtra(i, 'name', ev.target.value)} /></td>
-                    <td><input type="number" value={e.price} onChange={ev => updateExtra(i, 'price', ev.target.value)} /></td>
-                    <td><input value={e.unit} style={{width:90}} onChange={ev => updateExtra(i, 'unit', ev.target.value)} /></td>
-                    <td><button className="btn btn-danger btn-xs" onClick={() => removeExtra(i)}>✕</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <button className="btn btn-outline btn-sm admin-add-btn" onClick={addExtra}>+ Add Extra</button>
-          </div>
-
-          <div style={{padding:16,textAlign:'center'}}>
-            <button className="btn btn-primary" onClick={onClose}>✓ Done — Back to Quote Wizard</button>
-            <div style={{fontSize:10,color:'var(--grey-500)',marginTop:8}}>All changes auto-saved to your browser</div>
+          <div className="admin-section"><h3>🔧 Extras</h3>
+            <table className="admin-table"><thead><tr><th>Name</th><th>Price (R)</th><th>Unit</th><th></th></tr></thead><tbody>
+              {pricing.extras.map((e,i)=><tr key={e.id}><td><input value={e.name} onChange={ev=>ue(i,'name',ev.target.value)}/></td><td><input type="number" value={e.price} onChange={ev=>ue(i,'price',ev.target.value)}/></td><td><input value={e.unit} style={{width:80}} onChange={ev=>ue(i,'unit',ev.target.value)}/></td><td><button className="btn btn-danger btn-xs" onClick={()=>re(i)}>✕</button></td></tr>)}
+            </tbody></table>
+            <button className="btn btn-outline btn-sm admin-add-btn" onClick={ae}>+ Add Extra</button>
           </div>
         </div>
       );
     }
 
     // ── QUOTE WIZARD ──
-    function QuoteWizard({ pricing, onOpenAdmin }) {
+    function QuoteWizard({ pricing, onQuoteSubmit }) {
       const [step, setStep] = useState(1);
-      const [selections, setSelections] = useState({
-        service: '',
-        courtTypes: [],
-        courtCount: '1',
-        condition: '',
-        province: '',
-        projectType: '',
-        extras: [],
-        name: '', email: '', phone: '', message: '',
-      });
-
-      const update = (field, value) => setSelections(s => ({ ...s, [field]: value }));
-      const toggleArray = (field, value) => {
-        setSelections(s => ({
-          ...s,
-          [field]: s[field].includes(value) ? s[field].filter(v => v !== value) : [...s[field], value],
-        }));
+      const [selections, setSelections] = useState({ service:'', courtTypes:[], courtCount:'1', condition:'', province:'', projectType:'', extras:[], name:'', email:'', phone:'', message:'' });
+      const update = (f,v) => setSelections(s=>({...s,[f]:v}));
+      const toggleArr = (f,v) => setSelections(s=>({...s,[f]:s[f].includes(v)?s[f].filter(x=>x!==v):[...s[f],v]}));
+      const quote = useMemo(()=>calculatePrice(selections,pricing),[selections,pricing]);
+      const canNext = () => { if(step===1) return selections.service && selections.courtTypes.length>0; if(step===2) return selections.condition && selections.province && selections.projectType; return true; };
+      const handleSubmit = () => {
+        const q = { id: generateId(), ...selections, quote: calculatePrice(selections,pricing), status: 'sent', createdAt: new Date().toISOString(), followUpDate: null, notes: '' };
+        onQuoteSubmit(q);
+        setSelections({ service:'', courtTypes:[], courtCount:'1', condition:'', province:'', projectType:'', extras:[], name:'', email:'', phone:'', message:'' });
+        setStep(1);
       };
 
-      const quote = useMemo(() => calculatePrice(selections, pricing), [selections, pricing]);
+      return (<div>
+        <div className="steps">
+          {['Service & Courts','Condition & Location','Extras','Contact'].map((l,i)=>(
+            <div key={i} className={`step ${step===i+1?'active':''} ${step>i+1?'done':''}`} onClick={()=>step>i+1&&setStep(i+1)}>
+              <span className="step-num">{step>i+1?'✓':i+1}</span>{l}
+            </div>
+          ))}
+        </div>
+        <div className="content">
+          {step===1 && (<div>
+            <div className="form-group"><label className="form-label">Service Required</label>
+              <select className="form-select" value={selections.service} onChange={e=>update('service',e.target.value)}>
+                <option value="">Select service...</option>
+                {pricing.services.map(s=><option key={s.id} value={s.id}>{s.name} — R{s.baseRate}/m²</option>)}
+              </select>
+            </div>
+            <div className="form-group"><label className="form-label">Court Type</label>
+              <div className="court-grid">
+                {pricing.courtTypes.map(ct=><div key={ct.id} className={`court-tile ${selections.courtTypes.includes(ct.id)?'selected':''}`} onClick={()=>toggleArr('courtTypes',ct.id)}><span className="court-tile-icon">{ct.icon}</span>{ct.name}<div style={{fontSize:9,color:'var(--grey-500)',fontWeight:400}}>{ct.areaM2}m²</div></div>)}
+              </div>
+            </div>
+            <div className="form-group"><label className="form-label">Number of Courts (per type)</label>
+              <select className="form-select" value={selections.courtCount} onChange={e=>update('courtCount',e.target.value)}>
+                {[1,2,3,4,5,6,7,8,9,10].map(n=><option key={n} value={n}>{n} {n===1?'court':'courts'}</option>)}
+              </select>
+            </div>
+          </div>)}
+          {step===2 && (<div>
+            <div className="form-group"><label className="form-label">Court Condition</label>
+              <div className="condition-grid">
+                {pricing.conditions.map(c=><div key={c.id} className={`condition-card ${selections.condition===c.id?'selected':''}`} onClick={()=>update('condition',c.id)}><span className="icon">{c.icon}</span><span className="label">{c.name}</span><span className="hint">{c.hint} {c.multiplier>1?`(+${Math.round((c.multiplier-1)*100)}%)`:''}</span></div>)}
+              </div>
+            </div>
+            <div className="form-group"><label className="form-label">Province</label>
+              <select className="form-select" value={selections.province} onChange={e=>update('province',e.target.value)}>
+                <option value="">Select province...</option>
+                {pricing.provinces.map(p=><option key={p.id} value={p.id}>{p.name}{p.surcharge>0?` (+${Math.round(p.surcharge*100)}%)`:' (no surcharge)'}</option>)}
+              </select>
+            </div>
+            <div className="form-group"><label className="form-label">Project Type</label>
+              <select className="form-select" value={selections.projectType} onChange={e=>update('projectType',e.target.value)}>
+                <option value="">Select type...</option>
+                {pricing.projectTypes.map(pt=><option key={pt.id} value={pt.id}>{pt.name} — {pt.warrantyYears}-year warranty</option>)}
+              </select>
+            </div>
+          </div>)}
+          {step===3 && (<div>
+            <div className="form-group"><label className="form-label">Optional Extras</label>
+              {pricing.extras.map(ext=><div key={ext.id} className={`extra-row ${selections.extras.includes(ext.id)?'selected':''}`} onClick={()=>toggleArr('extras',ext.id)}>
+                <div className="extra-info"><span className="extra-icon">{ext.icon}</span><div><div className="extra-name">{ext.name}</div><div style={{fontSize:9,color:'var(--grey-500)'}}>{ext.unit}</div></div></div>
+                <div style={{display:'flex',alignItems:'center',gap:8}}><span className="extra-price">R{ext.price.toLocaleString()}</span><div className="extra-check">{selections.extras.includes(ext.id)?'✓':''}</div></div>
+              </div>)}
+            </div>
+            {quote && <div className="price-card"><div className="price-label">Estimated Price</div><div className="price-estimate">R{quote.total.toLocaleString()}</div><div className="price-note">Incl. VAT · {quote.totalCourts} courts · {quote.totalArea}m²</div></div>}
+          </div>)}
+          {step===4 && (<div>
+            {quote && <div className="price-card"><div className="price-label">Quote Summary</div><div className="price-estimate" style={{marginBottom:10}}>R{quote.total.toLocaleString()}</div>
+              {quote.breakdown.map((b,i)=><div key={i} className="price-line"><span>{b.label}</span><span style={{color:b.amount<0?'var(--red)':'inherit'}}>{b.amount<0?'-':''}R{Math.abs(b.amount).toLocaleString()}</span></div>)}
+              <div className="price-line" style={{marginTop:4,paddingTop:6,borderTop:'2px solid var(--green)'}}><span>Total (incl. 15% VAT)</span><span style={{color:'var(--green-dark)'}}>R{quote.total.toLocaleString()}</span></div>
+              <div className="price-note" style={{marginTop:6}}>{quote.courtBreakdown.map(cb=>`${cb.count}× ${cb.icon} ${cb.name}`).join(' · ')}</div>
+            </div>}
+            <div style={{marginTop:14}}>
+              <div className="form-group"><label className="form-label">Client / Organisation Name *</label><input className="form-input" placeholder="e.g. Pearson High School" value={selections.name} onChange={e=>update('name',e.target.value)}/></div>
+              <div className="form-group"><label className="form-label">Contact Person</label><input className="form-input" placeholder="Full name" value={selections.contact||''} onChange={e=>update('contact',e.target.value)}/></div>
+              <div className="form-group"><label className="form-label">Email</label><input className="form-input" type="email" placeholder="email@example.com" value={selections.email} onChange={e=>update('email',e.target.value)}/></div>
+              <div className="form-group"><label className="form-label">Phone *</label><input className="form-input" type="tel" placeholder="082 123 4567" value={selections.phone} onChange={e=>update('phone',e.target.value)}/></div>
+              <div className="form-group"><label className="form-label">Site Address</label><input className="form-input" placeholder="Physical location of courts" value={selections.address||''} onChange={e=>update('address',e.target.value)}/></div>
+              <div className="form-group"><label className="form-label">Notes</label><textarea className="form-input" rows="3" placeholder="Any specific requirements, tender deadlines, etc." value={selections.message} onChange={e=>update('message',e.target.value)}/></div>
+            </div>
+          </div>)}
+        </div>
+        <div className="nav-buttons">
+          {step>1 && <button className="btn btn-outline" onClick={()=>setStep(s=>s-1)}>← Back</button>}
+          {step<4 ? <button className="btn btn-primary" onClick={()=>canNext()&&setStep(s=>s+1)} disabled={!canNext()}>Continue →</button>
+          : <button className="btn btn-primary" onClick={handleSubmit} disabled={!selections.name||!selections.phone}>📩 Send Quote</button>}
+        </div>
+      </div>);
+    }
 
-      const canNext = () => {
-        if (step === 1) return selections.service && selections.courtTypes.length > 0;
-        if (step === 2) return selections.condition && selections.province && selections.projectType;
-        return true;
-      };
-
+    // ── SPEC PACK / HANDOVER MODAL ──
+    function HandoverModal({ quote, pricing, onClose, onConfirm }) {
+      const pt = pricing.projectTypes.find(p=>p.id===quote.projectType);
       return (
-        <div>
-          {/* Steps */}
-          <div className="steps">
-            {['Service & Courts', 'Condition & Location', 'Extras', 'Contact'].map((label, i) => (
-              <div key={i} className={`step ${step === i+1 ? 'active' : ''} ${step > i+1 ? 'done' : ''}`} onClick={() => step > i+1 && setStep(i+1)}>
-                <span className="step-num">{step > i+1 ? '✓' : i+1}</span>
-                {label}
-              </div>
-            ))}
-          </div>
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="modal-header"><div className="modal-title">📋 Handover to Site Team</div><button className="btn btn-sm btn-outline" onClick={onClose}>✕</button></div>
 
-          <div className="content">
-            {/* STEP 1: Service & Courts */}
-            {step === 1 && (
-              <div>
-                <div className="form-group">
-                  <label className="form-label">Service Required</label>
-                  <select className="form-select" value={selections.service} onChange={e => update('service', e.target.value)}>
-                    <option value="">Select service...</option>
-                    {pricing.services.map(s => (
-                      <option key={s.id} value={s.id}>{s.name} — R{s.baseRate}/m²</option>
-                    ))}
-                  </select>
-                </div>
+            <div className="spec-section">
+              <h4>Job Details</h4>
+              <table className="spec-table">
+                <tbody>
+                  <tr><td style={{fontWeight:600}}>Client</td><td>{quote.name}</td></tr>
+                  <tr><td style={{fontWeight:600}}>Quote Ref</td><td>{quote.id}</td></tr>
+                  <tr><td style={{fontWeight:600}}>Site</td><td>{quote.address || 'TBC'}</td></tr>
+                  <tr><td style={{fontWeight:600}}>Province</td><td>{pricing.provinces.find(p=>p.id===quote.province)?.name}</td></tr>
+                  <tr><td style={{fontWeight:600}}>Project Type</td><td>{pt?.name} — {pt?.warrantyYears}-year warranty</td></tr>
+                </tbody>
+              </table>
+            </div>
 
-                <div className="form-group">
-                  <label className="form-label">Court Type (select all that apply)</label>
-                  <div className="court-grid">
-                    {pricing.courtTypes.map(ct => (
-                      <div key={ct.id} className={`court-tile ${selections.courtTypes.includes(ct.id) ? 'selected' : ''}`}
-                        onClick={() => toggleArray('courtTypes', ct.id)}>
-                        <span className="court-tile-icon">{ct.icon}</span>
-                        {ct.name}
-                        <div style={{fontSize:10,color:'var(--grey-500)',fontWeight:400}}>{ct.areaM2}m²</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            <div className="spec-section">
+              <h4>Courts</h4>
+              <table className="spec-table"><thead><tr><th>Court</th><th>Count</th><th>Area</th><th>Total</th></tr></thead><tbody>
+                {quote.quote?.courtBreakdown.map((cb,i)=><tr key={i}><td>{cb.icon} {cb.name}</td><td>{cb.count}</td><td>{cb.areaPer}m²</td><td>{cb.totalArea}m²</td></tr>)}
+              </tbody></table>
+            </div>
 
-                <div className="form-group">
-                  <label className="form-label">Number of Courts (per type)</label>
-                  <select className="form-select" value={selections.courtCount} onChange={e => update('courtCount', e.target.value)}>
-                    {[1,2,3,4,5,6,7,8,9,10].map(n => <option key={n} value={n}>{n} {n === 1 ? 'court' : 'courts'}</option>)}
-                  </select>
-                </div>
-              </div>
-            )}
+            <div className="spec-section">
+              <h4>Installation Checklist</h4>
+              <div className="checklist-item"><input type="checkbox"/> Materials delivered to site</div>
+              <div className="checklist-item"><input type="checkbox"/> Plant & equipment hired</div>
+              <div className="checklist-item"><input type="checkbox"/> Crew briefed on spec</div>
+              <div className="checklist-item"><input type="checkbox"/> Client access confirmed</div>
+              <div className="checklist-item"><input type="checkbox"/> Weather window checked (48h no rain)</div>
+              <div className="checklist-item"><input type="checkbox"/> Surface prep: pressure wash + crack repair</div>
+              <div className="checklist-item"><input type="checkbox"/> Acrylic coats applied & cured</div>
+              <div className="checklist-item"><input type="checkbox"/> Line marking per spec</div>
+              <div className="checklist-item"><input type="checkbox"/> Equipment installed (posts, fencing, lighting)</div>
+              <div className="checklist-item"><input type="checkbox"/> Client walkthrough & sign-off</div>
+              <div className="checklist-item"><input type="checkbox"/> Warranty certificate issued</div>
+              <div className="checklist-item"><input type="checkbox"/> Site cleaned, waste removed</div>
+            </div>
 
-            {/* STEP 2: Condition & Location */}
-            {step === 2 && (
-              <div>
-                <div className="form-group">
-                  <label className="form-label">Court Condition</label>
-                  <div className="condition-grid">
-                    {pricing.conditions.map(c => (
-                      <div key={c.id} className={`condition-card ${selections.condition === c.id ? 'selected' : ''}`}
-                        onClick={() => update('condition', c.id)}>
-                        <span className="icon">{c.icon}</span>
-                        <span className="label">{c.name}</span>
-                        <span className="hint">{c.hint} {c.multiplier > 1 ? `(+${Math.round((c.multiplier-1)*100)}%)` : ''}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            {quote.extras?.length > 0 && <div className="spec-section">
+              <h4>Extras to Install</h4>
+              {quote.extras.map(eid=>{const ex=pricing.extras.find(e=>e.id===eid); return ex?<div key={eid} style={{padding:'4px 0',fontSize:12}}>{ex.icon} {ex.name} — {quote.quote?.totalCourts}× R{ex.price.toLocaleString()}</div>:null;})}
+            </div>}
 
-                <div className="form-group">
-                  <label className="form-label">Province / Location</label>
-                  <select className="form-select" value={selections.province} onChange={e => update('province', e.target.value)}>
-                    <option value="">Select province...</option>
-                    {pricing.provinces.map(p => (
-                      <option key={p.id} value={p.id}>{p.name}{p.surcharge > 0 ? ` (+${Math.round(p.surcharge*100)}% surcharge)` : ' (no surcharge)'}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Project Type</label>
-                  <select className="form-select" value={selections.projectType} onChange={e => update('projectType', e.target.value)}>
-                    <option value="">Select type...</option>
-                    {pricing.projectTypes.map(pt => (
-                      <option key={pt.id} value={pt.id}>{pt.name} — {pt.warrantyYears}-year warranty</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            )}
-
-            {/* STEP 3: Extras */}
-            {step === 3 && (
-              <div>
-                <div className="form-group">
-                  <label className="form-label">Optional Extras</label>
-                  {pricing.extras.map(ext => (
-                    <div key={ext.id} className={`extra-row ${selections.extras.includes(ext.id) ? 'selected' : ''}`}
-                      onClick={() => toggleArray('extras', ext.id)}>
-                      <div className="extra-info">
-                        <span className="extra-icon">{ext.icon}</span>
-                        <div>
-                          <div className="extra-name">{ext.name}</div>
-                          <div style={{fontSize:10,color:'var(--grey-500)'}}>{ext.unit}</div>
-                        </div>
-                      </div>
-                      <div style={{display:'flex',alignItems:'center',gap:8}}>
-                        <span className="extra-price">R{ext.price.toLocaleString()}</span>
-                        <div className="extra-check">{selections.extras.includes(ext.id) ? '✓' : ''}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Price preview on step 3 */}
-                {quote && (
-                  <div className="price-card">
-                    <div className="price-label">Estimated Price</div>
-                    <div className="price-estimate">R{quote.total.toLocaleString()}</div>
-                    <div className="price-note">Incl. VAT · {quote.totalCourts} courts · {quote.totalArea}m²</div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* STEP 4: Contact & Final Quote */}
-            {step === 4 && (
-              <div>
-                {quote && (
-                  <div className="price-card">
-                    <div className="price-label">Quote Summary</div>
-                    <div className="price-estimate" style={{marginBottom:12}}>R{quote.total.toLocaleString()}</div>
-                    {quote.breakdown.map((b, i) => (
-                      <div key={i} className="price-line">
-                        <span>{b.label}</span>
-                        <span style={{color: b.amount < 0 ? 'var(--red)' : 'inherit'}}>
-                          {b.amount < 0 ? '-' : ''}R{Math.abs(b.amount).toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
-                    <div className="price-line" style={{marginTop:4,paddingTop:8,borderTop:'2px solid var(--green)'}}>
-                      <span>Total (incl. 15% VAT)</span>
-                      <span style={{color:'var(--green-dark)'}}>R{quote.total.toLocaleString()}</span>
-                    </div>
-                    <div className="price-note" style={{marginTop:8}}>
-                      {quote.courtBreakdown.map(cb => `${cb.count}× ${cb.name} (${cb.areaPer}m²)`).join(' · ')}
-                    </div>
-                  </div>
-                )}
-
-                <div style={{marginTop:16}}>
-                  <div className="form-group">
-                    <label className="form-label">Your Name *</label>
-                    <input className="form-input" placeholder="Full name" value={selections.name} onChange={e => update('name', e.target.value)} />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Email</label>
-                    <input className="form-input" type="email" placeholder="email@example.com" value={selections.email} onChange={e => update('email', e.target.value)} />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Phone *</label>
-                    <input className="form-input" type="tel" placeholder="082 123 4567" value={selections.phone} onChange={e => update('phone', e.target.value)} />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Message / Notes</label>
-                    <textarea className="form-input" rows="3" placeholder="Any specific requirements..."
-                      value={selections.message} onChange={e => update('message', e.target.value)} style={{resize:'vertical'}} />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Navigation */}
-          <div className="nav-buttons">
-            {step > 1 && (
-              <button className="btn btn-outline" onClick={() => setStep(s => s - 1)}>← Back</button>
-            )}
-            {step < 4 ? (
-              <button className="btn btn-primary" onClick={() => canNext() && setStep(s => s + 1)} disabled={!canNext()}>
-                Continue →
-              </button>
-            ) : (
-              <button className="btn btn-primary" onClick={() => alert('✅ Quote request submitted!\n\nIn the live system, this would:\n• Email the quote PDF to the customer\n• Notify Grand Slam via WhatsApp\n• Save to the lead CRM')}>
-                📩 Submit Quote Request
-              </button>
-            )}
+            <div style={{display:'flex',gap:8,marginTop:16}}>
+              <button className="btn btn-outline" style={{flex:1}} onClick={onClose}>Cancel</button>
+              <button className="btn btn-purple" style={{flex:1}} onClick={()=>{onConfirm(quote.id); onClose();}}>✅ Confirm Handover</button>
+            </div>
           </div>
         </div>
       );
     }
 
-    // ── MAIN APP ──
-    function App() {
-      const [pricing, setPricing] = useState(() => loadPricing());
-      const [showAdmin, setShowAdmin] = useState(false);
+    // ── QUOTES DASHBOARD ──
+    function QuotesDashboard({ quotes, pricing, onUpdateQuote, onDeleteQuote }) {
+      const [filter, setFilter] = useState('all');
+      const [handoverQuote, setHandoverQuote] = useState(null);
+      const [toast, setToast] = useState(null);
 
-      useEffect(() => { savePricing(pricing); }, [pricing]);
-
-      const handleReset = () => {
-        if (confirm('Reset all pricing to defaults? This cannot be undone.')) {
-          setPricing(DEFAULT_PRICING);
-        }
+      const filtered = filter==='all' ? quotes : quotes.filter(q=>q.status===filter);
+      const stats = {
+        total: quotes.length,
+        sent: quotes.filter(q=>q.status==='sent'||q.status==='viewed').length,
+        accepted: quotes.filter(q=>q.status==='accepted'||q.status==='handedover').length,
+        value: quotes.filter(q=>q.status==='accepted'||q.status==='handedover').reduce((s,q)=>s+(q.quote?.total||0),0),
       };
 
-      return (
-        <div className="app">
-          {showAdmin ? (
-            <AdminPanel pricing={pricing} onUpdate={setPricing} onClose={() => setShowAdmin(false)} />
-          ) : (
-            <>
-              <div className="header">
-                <div>
-                  <div className="header-logo">🎾 Grand Slam Surfacing</div>
-                  <div style={{fontSize:10,opacity:0.8}}>Instant Quote Calculator</div>
-                </div>
-                <div className="header-actions">
-                  <button className="btn btn-ghost btn-sm" onClick={handleReset} title="Reset pricing">↺</button>
-                </div>
-              </div>
-              <QuoteWizard pricing={pricing} onOpenAdmin={() => setShowAdmin(true)} />
-            </>
-          )}
+      const overdueFollowups = quotes.filter(q=>q.followUpDate && new Date(q.followUpDate) < new Date() && q.status==='sent');
 
-          {/* Admin toggle button */}
-          <button className="admin-toggle" onClick={() => setShowAdmin(a => !a)} title={showAdmin ? 'Back to Quote Wizard' : 'Pricing Admin'}>
-            {showAdmin ? '✕' : '⚙️'}
-          </button>
+      const updateStatus = (q, newStatus) => {
+        const updates = { status: newStatus };
+        if (newStatus==='viewed') updates.viewedAt = new Date().toISOString();
+        if (newStatus==='accepted') updates.acceptedAt = new Date().toISOString();
+        if (newStatus==='declined') updates.declinedAt = new Date().toISOString();
+        onUpdateQuote(q.id, updates);
+        setToast(`${STATUS_LABELS[newStatus]}: ${q.name}`);
+      };
+
+      const setFollowUp = (q) => {
+        const date = prompt('Set follow-up date (YYYY-MM-DD):', q.followUpDate?.split('T')[0] || new Date(Date.now()+7*86400000).toISOString().split('T')[0]);
+        if (date) { onUpdateQuote(q.id, { followUpDate: new Date(date).toISOString(), status: 'sent' }); setToast(`Follow-up set for ${date}`); }
+      };
+
+      const formatDate = d => d ? new Date(d).toLocaleDateString('en-ZA', {day:'numeric',month:'short'}) : '—';
+
+      return (<div>
+        {toast && <Toast msg={toast} onDone={()=>setToast(null)}/>}
+        {handoverQuote && <HandoverModal quote={handoverQuote} pricing={pricing} onClose={()=>setHandoverQuote(null)} onConfirm={id=>{onUpdateQuote(id,{status:'handedover',handedOverAt:new Date().toISOString()});setToast('Handed over to site team! 🏗️');}}/>}
+
+        <div className="dash-stats">
+          <div className="stat-card blue"><div className="stat-value">{stats.total}</div><div className="stat-label">Total Quotes</div></div>
+          <div className="stat-card orange"><div className="stat-value">{stats.sent}</div><div className="stat-label">Outstanding</div></div>
+          <div className="stat-card green"><div className="stat-value">{stats.accepted}</div><div className="stat-label">Won</div></div>
+          <div className="stat-card green"><div className="stat-value">R{(stats.value/1000).toFixed(0)}k</div><div className="stat-label">Pipeline Value</div></div>
         </div>
-      );
+
+        {overdueFollowups.length > 0 && <div className="followup-alert" style={{marginBottom:12}}>
+          ⚠️ <strong>{overdueFollowups.length} follow-up{overdueFollowups.length>1?'s':''} overdue:</strong> {overdueFollowups.map(q=>q.name).join(', ')}
+        </div>}
+
+        <div style={{display:'flex',gap:6,marginBottom:12,flexWrap:'wrap'}}>
+          {['all','sent','viewed','accepted','declined','handedover'].map(s=>(
+            <button key={s} className={`btn ${filter===s?'btn-primary':'btn-outline'} btn-xs`} onClick={()=>setFilter(s)}>
+              {s==='all'?'All':STATUS_LABELS[s]} {s!=='all'&&<span style={{fontSize:9,marginLeft:2}}>({quotes.filter(q=>q.status===s).length})</span>}
+            </button>
+          ))}
+        </div>
+
+        {filtered.length===0 && <div className="empty-state"><div className="empty-icon">📭</div><div style={{fontWeight:600,marginBottom:4}}>No quotes yet</div><div>Create one from the Quote tab ↑</div></div>}
+
+        {filtered.map(q=>(
+          <div key={q.id} className="quote-card">
+            <div className="quote-header">
+              <div>
+                <div className="quote-client">{q.name}</div>
+                <div className="quote-org">{q.contact||'No contact'} · {q.phone} · {q.email||'No email'}</div>
+              </div>
+              <div style={{textAlign:'right'}}>
+                <div className="quote-amount">R{q.quote?.total?.toLocaleString()||'—'}</div>
+                <span className={`status-badge ${STATUS_CLASS[q.status]}`}>{STATUS_LABELS[q.status]}</span>
+              </div>
+            </div>
+            <div className="quote-meta">
+              <span>{q.quote?.totalCourts||'?'} courts</span>
+              <span>{q.quote?.totalArea||'?'}m²</span>
+              <span>{pricing.services.find(s=>s.id===q.service)?.name||q.service}</span>
+              <span>{pricing.provinces.find(p=>p.id===q.province)?.name||q.province}</span>
+              <span>Created {formatDate(q.createdAt)}</span>
+              {q.followUpDate && <span style={{background:new Date(q.followUpDate)<new Date()?'var(--red-light)':'var(--grey-100)'}}>📅 Follow-up: {formatDate(q.followUpDate)}</span>}
+            </div>
+            <div className="quote-actions">
+              {q.status==='sent' && <>
+                <button className="btn btn-sm btn-outline" onClick={()=>updateStatus(q,'viewed')}>👁 Mark Viewed</button>
+                <button className="btn btn-sm btn-orange" onClick={()=>setFollowUp(q)}>📅 Follow-up</button>
+              </>}
+              {['sent','viewed'].includes(q.status) && <>
+                <button className="btn btn-sm btn-primary" onClick={()=>updateStatus(q,'accepted')}>✅ Accept</button>
+                <button className="btn btn-sm btn-danger" onClick={()=>updateStatus(q,'declined')}>❌ Decline</button>
+              </>}
+              {q.status==='accepted' && <>
+                <button className="btn btn-sm btn-purple" onClick={()=>setHandoverQuote(q)}>🏗️ Handover to Site</button>
+              </>}
+              {q.status==='declined' && <span style={{fontSize:11,color:'var(--grey-500)'}}>Declined {formatDate(q.declinedAt)}</span>}
+              {q.status==='handedover' && <span style={{fontSize:11,color:'#006064'}}>✅ Handed over {formatDate(q.handedOverAt)} · Site team notified</span>}
+              <button className="btn btn-xs btn-ghost" style={{color:'var(--grey-500)',marginLeft:'auto'}} onClick={()=>{if(confirm('Delete this quote?'))onDeleteQuote(q.id);}}>🗑</button>
+            </div>
+          </div>
+        ))}
+      </div>);
+    }
+
+    // ── MAIN APP ──
+    function App() {
+      const [view, setView] = useState('quote');
+      const [pricing, setPricing] = useState(()=>loadPricing());
+      const [quotes, setQuotes] = useState(()=>loadQuotes());
+
+      useEffect(()=>{savePricing(pricing)},[pricing]);
+      useEffect(()=>{saveQuotes(quotes)},[quotes]);
+
+      const handleQuoteSubmit = (q) => { setQuotes(prev=>[q,...prev]); };
+      const handleUpdateQuote = (id, updates) => { setQuotes(prev=>prev.map(q=>q.id===id?{...q,...updates}:q)); };
+      const handleDeleteQuote = (id) => { setQuotes(prev=>prev.filter(q=>q.id!==id)); };
+
+      const pendingCount = quotes.filter(q=>q.status==='sent').length;
+
+      return (<div className="app">
+        <div className="header">
+          <div style={{flex:1}}><div className="header-logo">🎾 Grand Slam Surfacing</div><div className="header-sub">Quote & Project Manager</div></div>
+          {view==='quote' && <span className="badge" style={{background:'rgba(255,255,255,0.2)'}}>Quote</span>}
+          {view==='quotes' && <span className="badge" style={{background:'rgba(255,255,255,0.2)'}}>{quotes.length} quotes</span>}
+          {view==='admin' && <span className="badge" style={{background:'rgba(255,255,255,0.2)'}}>Admin</span>}
+        </div>
+
+        {view==='quote' && <QuoteWizard pricing={pricing} onQuoteSubmit={handleQuoteSubmit}/>}
+        {view==='quotes' && <div className="content"><QuotesDashboard quotes={quotes} pricing={pricing} onUpdateQuote={handleUpdateQuote} onDeleteQuote={handleDeleteQuote}/></div>}
+        {view==='admin' && <AdminPanel pricing={pricing} onUpdate={setPricing}/>}
+
+        <div className="bottom-nav">
+          <button className={`nav-item ${view==='quote'?'active':''}`} onClick={()=>setView('quote')}><span className="icon">📝</span>New Quote</button>
+          <button className={`nav-item ${view==='quotes'?'active':''}`} onClick={()=>setView('quotes')}>
+            <span className="icon">📊</span>Quotes {pendingCount>0 && <span className="nav-count">{pendingCount}</span>}
+          </button>
+          <button className={`nav-item ${view==='admin'?'active':''}`} onClick={()=>setView('admin')}><span className="icon">⚙️</span>Pricing</button>
+        </div>
+      </div></div>);
     }
 
     ReactDOM.createRoot(document.getElementById('root')).render(<App />);
