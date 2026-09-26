@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Grand Slam Surfacing — Quote System</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #1a8a3f; --green-dark: #0f5c28; --green-light: #e8f5e9;
+      --orange: #f57c00; --red: #d32f2f; --grey-50: #f9fafb;
+      --grey-100: #f3f4f6; --grey-200: #e5e7eb; --grey-300: #d1d5db;
+      --grey-500: #6b7280; --grey-700: #374151; --grey-900: #111827;
+      --white: #ffffff; --shadow: 0 1px 3px rgba(0,0,0,0.1);
+      --radius: 8px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--grey-50); color: var(--grey-900); -webkit-font-smoothing: antialiased; }
+    
+    /* ── MOBILE FIRST: 320px ── */
+    .app { max-width: 100%; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+    .header { background: var(--green); color: var(--white); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .header-logo { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; line-height: 1.2; letter-spacing: -0.3px; }
+    .header-badge { font-size: 10px; background: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 12px; white-space: nowrap; }
+    .header-actions { display: flex; gap: 6px; }
+    .btn { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: var(--radius); border: none; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-sm { font-size: 11px; padding: 5px 10px; }
+    .btn-xs { font-size: 10px; padding: 3px 8px; border-radius: 4px; }
+    .btn-primary { background: var(--green); color: var(--white); }
+    .btn-primary:hover { background: var(--green-dark); }
+    .btn-outline { background: var(--white); color: var(--green); border: 1.5px solid var(--green); }
+    .btn-outline:hover { background: var(--green-light); }
+    .btn-ghost { background: transparent; color: var(--white); border: 1px solid rgba(255,255,255,0.3); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.15); }
+    .btn-danger { background: var(--red); color: var(--white); }
+    .btn-orange { background: var(--orange); color: var(--white); }
+
+    /* Steps indicator */
+    .steps { display: flex; background: var(--white); border-bottom: 1px solid var(--grey-200); padding: 0; }
+    .step { flex: 1; text-align: center; padding: 12px 4px; font-size: 10px; font-weight: 600; color: var(--grey-500); position: relative; cursor: pointer; transition: color 0.2s; }
+    .step.active { color: var(--green); }
+    .step.done { color: var(--green-dark); }
+    .step::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: transparent; transition: background 0.2s; }
+    .step.active::after { background: var(--green); }
+    .step.done::after { background: var(--green-light); }
+    .step-num { display: block; width: 22px; height: 22px; border-radius: 50%; background: var(--grey-200); color: var(--grey-500); font-size: 11px; font-weight: 700; line-height: 22px; margin: 0 auto 4px; transition: all 0.2s; }
+    .step.active .step-num { background: var(--green); color: white; }
+    .step.done .step-num { background: var(--green-light); color: var(--green-dark); }
+
+    /* Main content */
+    .content { flex: 1; padding: 16px; overflow-y: auto; }
+
+    /* Form elements */
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--grey-700); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .form-select, .form-input { width: 100%; padding: 10px 12px; font-family: 'Inter', sans-serif; font-size: 14px; border: 1.5px solid var(--grey-300); border-radius: var(--radius); background: var(--white); color: var(--grey-900); appearance: none; -webkit-appearance: none; }
+    .form-select { background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+    .form-input:focus, .form-select:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(26,138,63,0.1); }
+
+    /* Court type tiles */
+    .court-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .court-tile { border: 2px solid var(--grey-200); border-radius: var(--radius); padding: 12px 10px; text-align: center; cursor: pointer; transition: all 0.15s; background: var(--white); font-size: 12px; font-weight: 600; }
+    .court-tile.selected { border-color: var(--green); background: var(--green-light); color: var(--green-dark); }
+    .court-tile-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+
+    /* Condition cards */
+    .condition-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .condition-card { border: 2px solid var(--grey-200); border-radius: var(--radius); padding: 14px 8px; text-align: center; cursor: pointer; transition: all 0.15s; background: var(--white); }
+    .condition-card.selected { border-color: var(--green); background: var(--green-light); }
+    .condition-card .icon { font-size: 28px; display: block; margin-bottom: 4px; }
+    .condition-card .label { font-size: 11px; font-weight: 600; }
+    .condition-card .hint { font-size: 9px; color: var(--grey-500); margin-top: 2px; }
+
+    /* Extras */
+    .extra-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; border: 1.5px solid var(--grey-200); border-radius: var(--radius); margin-bottom: 8px; background: var(--white); cursor: pointer; transition: all 0.15s; }
+    .extra-row.selected { border-color: var(--green); background: var(--green-light); }
+    .extra-info { display: flex; align-items: center; gap: 10px; }
+    .extra-icon { font-size: 22px; }
+    .extra-name { font-size: 13px; font-weight: 600; }
+    .extra-price { font-size: 12px; font-weight: 700; color: var(--green-dark); }
+    .extra-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--grey-300); display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.15s; }
+    .extra-row.selected .extra-check { background: var(--green); border-color: var(--green); color: white; }
+
+    /* Price summary */
+    .price-card { background: var(--white); border: 2px solid var(--green); border-radius: var(--radius); padding: 16px; margin-top: 16px; }
+    .price-estimate { font-family: 'Montserrat', sans-serif; font-size: 28px; font-weight: 800; color: var(--green-dark); text-align: center; }
+    .price-label { font-size: 11px; color: var(--grey-500); text-align: center; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .price-note { font-size: 10px; color: var(--grey-500); text-align: center; margin-top: 4px; }
+    .price-line { display: flex; justify-content: space-between; padding: 6px 0; font-size: 12px; border-bottom: 1px solid var(--grey-100); }
+    .price-line:last-child { border-bottom: none; font-weight: 700; font-size: 13px; }
+
+    /* Navigation buttons */
+    .nav-buttons { display: flex; gap: 8px; padding: 16px; background: var(--white); border-top: 1px solid var(--grey-200); }
+    .nav-buttons .btn { flex: 1; justify-content: center; }
+
+    /* ── ADMIN PANEL ── */
+    .admin { display: none; background: var(--white); }
+    .admin.visible { display: block; }
+    .admin-section { padding: 16px; border-bottom: 1px solid var(--grey-200); }
+    .admin-section h3 { font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 10px; color: var(--grey-900); display: flex; align-items: center; gap: 8px; }
+    .admin-section h3 .icon { font-size: 18px; }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .admin-table th { text-align: left; padding: 8px 6px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.3px; color: var(--grey-500); border-bottom: 2px solid var(--grey-200); }
+    .admin-table td { padding: 6px; border-bottom: 1px solid var(--grey-100); }
+    .admin-table input, .admin-table select { width: 100%; padding: 6px 8px; font-size: 12px; border: 1.5px solid var(--grey-300); border-radius: 4px; font-family: 'Inter', sans-serif; }
+    .admin-table input:focus, .admin-table select:focus { outline: none; border-color: var(--green); }
+    .admin-table input[type="number"] { width: 70px; text-align: right; }
+    .admin-add-btn { margin-top: 8px; }
+    .admin-toggle { position: fixed; bottom: 16px; right: 16px; z-index: 100; width: 44px; height: 44px; border-radius: 50%; background: var(--grey-900); color: white; border: none; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; }
+    .admin-badge { background: var(--orange); color: white; font-size: 9px; padding: 2px 6px; border-radius: 8px; font-weight: 700; }
+
+    /* Tablet: 600px+ */
+    @media (min-width: 600px) {
+      .app { max-width: 600px; }
+      .court-grid { grid-template-columns: 1fr 1fr 1fr; }
+      .header { padding: 16px 24px; }
+      .header-logo { font-size: 18px; }
+      .content { padding: 24px; }
+      .steps { padding: 0 24px; }
+      .step { font-size: 11px; }
+      .nav-buttons { padding: 16px 24px; }
+      .price-estimate { font-size: 32px; }
+    }
+    /* Desktop: 960px+ */
+    @media (min-width: 960px) {
+      .app { max-width: 800px; border-left: 1px solid var(--grey-200); border-right: 1px solid var(--grey-200); }
+      .content { padding: 32px; }
+      .court-grid { grid-template-columns: repeat(3, 1fr); }
+      .condition-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useCallback, useMemo } = React;
+
+    // ── DEFAULT PRICING (editable by owner) ──
+    const DEFAULT_PRICING = {
+      services: [
+        { id: 'resurface', name: 'Court Resurfacing', baseRate: 280, unit: 'per m²' },
+        { id: 'construction', name: 'New Court Construction', baseRate: 520, unit: 'per m²' },
+        { id: 'equipment', name: 'Sports Equipment Only', baseRate: 0, unit: 'per item' },
+      ],
+      courtTypes: [
+        { id: 'tennis', name: 'Tennis', areaM2: 650, icon: '🎾' },
+        { id: 'netball', name: 'Netball', areaM2: 780, icon: '🏐' },
+        { id: 'basketball', name: 'Basketball', areaM2: 620, icon: '🏀' },
+        { id: 'pickleball', name: 'Pickleball', areaM2: 150, icon: '🏓' },
+        { id: 'futsal', name: 'Futsal', areaM2: 800, icon: '⚽' },
+        { id: 'combo', name: 'Multi-Purpose', areaM2: 1000, icon: '🏟️' },
+      ],
+      conditions: [
+        { id: 'good', name: 'Good', multiplier: 1.0, icon: '✅', hint: 'Minor wear' },
+        { id: 'cracked', name: 'Cracked', multiplier: 1.35, icon: '⚠️', hint: 'Crack repair' },
+        { id: 'severe', name: 'Severe', multiplier: 1.8, icon: '🔴', hint: 'Full rebuild' },
+      ],
+      provinces: [
+        { id: 'EC', name: 'Eastern Cape', surcharge: 0 },
+        { id: 'WC', name: 'Western Cape', surcharge: 0.12 },
+        { id: 'NC', name: 'Northern Cape', surcharge: 0.18 },
+        { id: 'FS', name: 'Free State', surcharge: 0.10 },
+        { id: 'KZN', name: 'KwaZulu-Natal', surcharge: 0.12 },
+        { id: 'GP', name: 'Gauteng', surcharge: 0.15 },
+        { id: 'NW', name: 'North West', surcharge: 0.15 },
+        { id: 'MP', name: 'Mpumalanga', surcharge: 0.18 },
+        { id: 'LP', name: 'Limpopo', surcharge: 0.22 },
+      ],
+      projectTypes: [
+        { id: 'school', name: 'School', warrantyYears: 5 },
+        { id: 'club', name: 'Club', warrantyYears: 3 },
+        { id: 'corporate', name: 'Corporate', warrantyYears: 5 },
+        { id: 'private', name: 'Private', warrantyYears: 3 },
+      ],
+      extras: [
+        { id: 'fencing', name: 'Fencing (3m high)', price: 18000, unit: 'per court', icon: '🏗️' },
+        { id: 'lighting', name: 'LED Lighting (6-pole)', price: 45000, unit: 'per court', icon: '💡' },
+        { id: 'seating', name: 'Seating (basic)', price: 12000, unit: 'per court', icon: '🪑' },
+        { id: 'netposts', name: 'Net Posts & Nets', price: 4500, unit: 'per pair', icon: '🥅' },
+      ],
+    };
+
+    // ── PRICING ENGINE ──
+    function calculatePrice(selections, pricing) {
+      const { service, courtTypes, courtCount, condition, province, extras } = selections;
+      if (!service || !courtTypes.length || !condition || !province) return null;
+
+      const svc = pricing.services.find(s => s.id === service);
+      const cond = pricing.conditions.find(c => c.id === condition);
+      const prov = pricing.provinces.find(p => p.id === province);
+
+      // Calculate area
+      let totalArea = 0;
+      let courtBreakdown = [];
+      courtTypes.forEach(ctId => {
+        const ct = pricing.courtTypes.find(c => c.id === ctId);
+        if (ct) {
+          const area = ct.areaM2 * (parseInt(courtCount) || 1);
+          totalArea += area;
+          courtBreakdown.push({ name: ct.name, count: parseInt(courtCount) || 1, areaPer: ct.areaM2, totalArea: area });
+        }
+      });
+
+      // Base price
+      let subtotal = svc.baseRate * totalArea;
+      const breakdown = [];
+
+      breakdown.push({ label: `${svc.name} (${totalArea}m² × R${svc.baseRate}/m²)`, amount: subtotal });
+
+      // Condition
+      if (cond.multiplier !== 1.0) {
+        const condAmount = subtotal * (cond.multiplier - 1);
+        subtotal = subtotal * cond.multiplier;
+        breakdown.push({ label: `Condition: ${cond.name} (${Math.round((cond.multiplier-1)*100)}% extra)`, amount: condAmount });
+      }
+
+      // Province surcharge
+      if (prov.surcharge > 0) {
+        const surchAmount = subtotal * prov.surcharge;
+        subtotal += surchAmount;
+        breakdown.push({ label: `Province surcharge: ${prov.name} (${Math.round(prov.surcharge*100)}%)`, amount: Math.round(surchAmount) });
+      }
+
+      // Volume discount (5+ courts)
+      const totalCourts = (parseInt(courtCount) || 1) * courtTypes.length;
+      let volumeDiscount = 0;
+      if (totalCourts >= 5) {
+        volumeDiscount = Math.round(subtotal * 0.07);
+        breakdown.push({ label: `Volume discount (${totalCourts} courts, 7% off)`, amount: -volumeDiscount });
+      }
+
+      // Extras
+      let extrasTotal = 0;
+      extras.forEach(extId => {
+        const ext = pricing.extras.find(e => e.id === extId);
+        if (ext) {
+          const extCost = ext.price * totalCourts;
+          extrasTotal += extCost;
+          breakdown.push({ label: `${ext.name} (${totalCourts} × R${ext.price.toLocaleString()})`, amount: extCost });
+        }
+      });
+
+      const preVat = subtotal - volumeDiscount + extrasTotal;
+      const vat = Math.round(preVat * 0.15);
+      const total = preVat + vat;
+
+      return {
+        subtotal: Math.round(subtotal),
+        volumeDiscount,
+        extrasTotal,
+        preVat: Math.round(preVat),
+        vat,
+        total,
+        totalCourts,
+        totalArea,
+        breakdown,
+        courtBreakdown,
+      };
+    }
+
+    // ── LOCAL STORAGE HELPERS ──
+    const STORAGE_KEY = 'grandslam_pricing';
+    function loadPricing() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : DEFAULT_PRICING;
+      } catch { return DEFAULT_PRICING; }
+    }
+    function savePricing(pricing) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(pricing));
+    }
+
+    // ── ADMIN PANEL ──
+    function AdminPanel({ pricing, onUpdate, onClose }) {
+      const updateService = (idx, field, value) => {
+        const svcs = [...pricing.services];
+        svcs[idx] = { ...svcs[idx], [field]: field === 'baseRate' ? parseFloat(value) || 0 : value };
+        onUpdate({ ...pricing, services: svcs });
+      };
+      const updateCourtType = (idx, field, value) => {
+        const cts = [...pricing.courtTypes];
+        cts[idx] = { ...cts[idx], [field]: field === 'areaM2' ? parseInt(value) || 0 : value };
+        onUpdate({ ...pricing, courtTypes: cts });
+      };
+      const updateCondition = (idx, field, value) => {
+        const conds = [...pricing.conditions];
+        conds[idx] = { ...conds[idx], [field]: field === 'multiplier' ? parseFloat(value) || 1.0 : value };
+        onUpdate({ ...pricing, conditions: conds });
+      };
+      const updateProvince = (idx, field, value) => {
+        const provs = [...pricing.provinces];
+        provs[idx] = { ...provs[idx], [field]: field === 'surcharge' ? parseFloat(value) || 0 : value };
+        onUpdate({ ...pricing, provinces: provs });
+      };
+      const updateExtra = (idx, field, value) => {
+        const exts = [...pricing.extras];
+        exts[idx] = { ...exts[idx], [field]: field === 'price' ? parseInt(value) || 0 : value };
+        onUpdate({ ...pricing, extras: exts });
+      };
+      const addExtra = () => {
+        const newId = 'extra_' + Date.now();
+        onUpdate({ ...pricing, extras: [...pricing.extras, { id: newId, name: 'New Extra', price: 0, unit: 'per court', icon: '📦' }] });
+      };
+      const removeExtra = (idx) => {
+        const exts = pricing.extras.filter((_, i) => i !== idx);
+        onUpdate({ ...pricing, extras: exts });
+      };
+
+      return (
+        <div className="admin visible">
+          <div className="header" style={{background:'var(--grey-900)'}}>
+            <div>
+              <div className="header-logo">⚙️ Pricing Admin</div>
+              <div style={{fontSize:10,opacity:0.7}}>Edit & save — changes apply instantly to quotes</div>
+            </div>
+            <button className="btn btn-ghost btn-sm" onClick={onClose}>✕ Close</button>
+          </div>
+
+          {/* Services */}
+          <div className="admin-section">
+            <h3><span className="icon">📋</span> Services & Base Rates</h3>
+            <table className="admin-table">
+              <thead><tr><th>Service</th><th>Base Rate (R/m²)</th></tr></thead>
+              <tbody>
+                {pricing.services.map((s, i) => (
+                  <tr key={s.id}>
+                    <td><input value={s.name} onChange={e => updateService(i, 'name', e.target.value)} /></td>
+                    <td><input type="number" value={s.baseRate} onChange={e => updateService(i, 'baseRate', e.target.value)} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Court Types */}
+          <div className="admin-section">
+            <h3><span className="icon">🏟️</span> Court Types & Sizes</h3>
+            <table className="admin-table">
+              <thead><tr><th>Court</th><th>Icon</th><th>Area (m²)</th></tr></thead>
+              <tbody>
+                {pricing.courtTypes.map((ct, i) => (
+                  <tr key={ct.id}>
+                    <td><input value={ct.name} onChange={e => updateCourtType(i, 'name', e.target.value)} /></td>
+                    <td><input value={ct.icon} style={{width:40,textAlign:'center'}} onChange={e => updateCourtType(i, 'icon', e.target.value)} /></td>
+                    <td><input type="number" value={ct.areaM2} onChange={e => updateCourtType(i, 'areaM2', e.target.value)} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Conditions */}
+          <div className="admin-section">
+            <h3><span className="icon">🔍</span> Condition Multipliers</h3>
+            <table className="admin-table">
+              <thead><tr><th>Condition</th><th>Multiplier</th><th>Hint</th></tr></thead>
+              <tbody>
+                {pricing.conditions.map((c, i) => (
+                  <tr key={c.id}>
+                    <td><input value={c.name} onChange={e => updateCondition(i, 'name', e.target.value)} /></td>
+                    <td><input type="number" step="0.01" value={c.multiplier} onChange={e => updateCondition(i, 'multiplier', e.target.value)} /></td>
+                    <td><input value={c.hint} onChange={e => updateCondition(i, 'hint', e.target.value)} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Provinces */}
+          <div className="admin-section">
+            <h3><span className="icon">🗺️</span> Province Surcharges</h3>
+            <table className="admin-table">
+              <thead><tr><th>Province</th><th>Surcharge %</th></tr></thead>
+              <tbody>
+                {pricing.provinces.map((p, i) => (
+                  <tr key={p.id}>
+                    <td><input value={p.name} onChange={e => updateProvince(i, 'name', e.target.value)} /></td>
+                    <td><input type="number" step="0.01" value={p.surcharge} onChange={e => updateProvince(i, 'surcharge', e.target.value)} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Extras */}
+          <div className="admin-section">
+            <h3><span className="icon">🔧</span> Extras & Add-ons</h3>
+            <table className="admin-table">
+              <thead><tr><th>Name</th><th>Price (R)</th><th>Unit</th><th></th></tr></thead>
+              <tbody>
+                {pricing.extras.map((e, i) => (
+                  <tr key={e.id}>
+                    <td><input value={e.name} onChange={ev => updateExtra(i, 'name', ev.target.value)} /></td>
+                    <td><input type="number" value={e.price} onChange={ev => updateExtra(i, 'price', ev.target.value)} /></td>
+                    <td><input value={e.unit} style={{width:90}} onChange={ev => updateExtra(i, 'unit', ev.target.value)} /></td>
+                    <td><button className="btn btn-danger btn-xs" onClick={() => removeExtra(i)}>✕</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <button className="btn btn-outline btn-sm admin-add-btn" onClick={addExtra}>+ Add Extra</button>
+          </div>
+
+          <div style={{padding:16,textAlign:'center'}}>
+            <button className="btn btn-primary" onClick={onClose}>✓ Done — Back to Quote Wizard</button>
+            <div style={{fontSize:10,color:'var(--grey-500)',marginTop:8}}>All changes auto-saved to your browser</div>
+          </div>
+        </div>
+      );
+    }
+
+    // ── QUOTE WIZARD ──
+    function QuoteWizard({ pricing, onOpenAdmin }) {
+      const [step, setStep] = useState(1);
+      const [selections, setSelections] = useState({
+        service: '',
+        courtTypes: [],
+        courtCount: '1',
+        condition: '',
+        province: '',
+        projectType: '',
+        extras: [],
+        name: '', email: '', phone: '', message: '',
+      });
+
+      const update = (field, value) => setSelections(s => ({ ...s, [field]: value }));
+      const toggleArray = (field, value) => {
+        setSelections(s => ({
+          ...s,
+          [field]: s[field].includes(value) ? s[field].filter(v => v !== value) : [...s[field], value],
+        }));
+      };
+
+      const quote = useMemo(() => calculatePrice(selections, pricing), [selections, pricing]);
+
+      const canNext = () => {
+        if (step === 1) return selections.service && selections.courtTypes.length > 0;
+        if (step === 2) return selections.condition && selections.province && selections.projectType;
+        return true;
+      };
+
+      return (
+        <div>
+          {/* Steps */}
+          <div className="steps">
+            {['Service & Courts', 'Condition & Location', 'Extras', 'Contact'].map((label, i) => (
+              <div key={i} className={`step ${step === i+1 ? 'active' : ''} ${step > i+1 ? 'done' : ''}`} onClick={() => step > i+1 && setStep(i+1)}>
+                <span className="step-num">{step > i+1 ? '✓' : i+1}</span>
+                {label}
+              </div>
+            ))}
+          </div>
+
+          <div className="content">
+            {/* STEP 1: Service & Courts */}
+            {step === 1 && (
+              <div>
+                <div className="form-group">
+                  <label className="form-label">Service Required</label>
+                  <select className="form-select" value={selections.service} onChange={e => update('service', e.target.value)}>
+                    <option value="">Select service...</option>
+                    {pricing.services.map(s => (
+                      <option key={s.id} value={s.id}>{s.name} — R{s.baseRate}/m²</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Court Type (select all that apply)</label>
+                  <div className="court-grid">
+                    {pricing.courtTypes.map(ct => (
+                      <div key={ct.id} className={`court-tile ${selections.courtTypes.includes(ct.id) ? 'selected' : ''}`}
+                        onClick={() => toggleArray('courtTypes', ct.id)}>
+                        <span className="court-tile-icon">{ct.icon}</span>
+                        {ct.name}
+                        <div style={{fontSize:10,color:'var(--grey-500)',fontWeight:400}}>{ct.areaM2}m²</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Number of Courts (per type)</label>
+                  <select className="form-select" value={selections.courtCount} onChange={e => update('courtCount', e.target.value)}>
+                    {[1,2,3,4,5,6,7,8,9,10].map(n => <option key={n} value={n}>{n} {n === 1 ? 'court' : 'courts'}</option>)}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 2: Condition & Location */}
+            {step === 2 && (
+              <div>
+                <div className="form-group">
+                  <label className="form-label">Court Condition</label>
+                  <div className="condition-grid">
+                    {pricing.conditions.map(c => (
+                      <div key={c.id} className={`condition-card ${selections.condition === c.id ? 'selected' : ''}`}
+                        onClick={() => update('condition', c.id)}>
+                        <span className="icon">{c.icon}</span>
+                        <span className="label">{c.name}</span>
+                        <span className="hint">{c.hint} {c.multiplier > 1 ? `(+${Math.round((c.multiplier-1)*100)}%)` : ''}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Province / Location</label>
+                  <select className="form-select" value={selections.province} onChange={e => update('province', e.target.value)}>
+                    <option value="">Select province...</option>
+                    {pricing.provinces.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}{p.surcharge > 0 ? ` (+${Math.round(p.surcharge*100)}% surcharge)` : ' (no surcharge)'}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Project Type</label>
+                  <select className="form-select" value={selections.projectType} onChange={e => update('projectType', e.target.value)}>
+                    <option value="">Select type...</option>
+                    {pricing.projectTypes.map(pt => (
+                      <option key={pt.id} value={pt.id}>{pt.name} — {pt.warrantyYears}-year warranty</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 3: Extras */}
+            {step === 3 && (
+              <div>
+                <div className="form-group">
+                  <label className="form-label">Optional Extras</label>
+                  {pricing.extras.map(ext => (
+                    <div key={ext.id} className={`extra-row ${selections.extras.includes(ext.id) ? 'selected' : ''}`}
+                      onClick={() => toggleArray('extras', ext.id)}>
+                      <div className="extra-info">
+                        <span className="extra-icon">{ext.icon}</span>
+                        <div>
+                          <div className="extra-name">{ext.name}</div>
+                          <div style={{fontSize:10,color:'var(--grey-500)'}}>{ext.unit}</div>
+                        </div>
+                      </div>
+                      <div style={{display:'flex',alignItems:'center',gap:8}}>
+                        <span className="extra-price">R{ext.price.toLocaleString()}</span>
+                        <div className="extra-check">{selections.extras.includes(ext.id) ? '✓' : ''}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Price preview on step 3 */}
+                {quote && (
+                  <div className="price-card">
+                    <div className="price-label">Estimated Price</div>
+                    <div className="price-estimate">R{quote.total.toLocaleString()}</div>
+                    <div className="price-note">Incl. VAT · {quote.totalCourts} courts · {quote.totalArea}m²</div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* STEP 4: Contact & Final Quote */}
+            {step === 4 && (
+              <div>
+                {quote && (
+                  <div className="price-card">
+                    <div className="price-label">Quote Summary</div>
+                    <div className="price-estimate" style={{marginBottom:12}}>R{quote.total.toLocaleString()}</div>
+                    {quote.breakdown.map((b, i) => (
+                      <div key={i} className="price-line">
+                        <span>{b.label}</span>
+                        <span style={{color: b.amount < 0 ? 'var(--red)' : 'inherit'}}>
+                          {b.amount < 0 ? '-' : ''}R{Math.abs(b.amount).toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="price-line" style={{marginTop:4,paddingTop:8,borderTop:'2px solid var(--green)'}}>
+                      <span>Total (incl. 15% VAT)</span>
+                      <span style={{color:'var(--green-dark)'}}>R{quote.total.toLocaleString()}</span>
+                    </div>
+                    <div className="price-note" style={{marginTop:8}}>
+                      {quote.courtBreakdown.map(cb => `${cb.count}× ${cb.name} (${cb.areaPer}m²)`).join(' · ')}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{marginTop:16}}>
+                  <div className="form-group">
+                    <label className="form-label">Your Name *</label>
+                    <input className="form-input" placeholder="Full name" value={selections.name} onChange={e => update('name', e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Email</label>
+                    <input className="form-input" type="email" placeholder="email@example.com" value={selections.email} onChange={e => update('email', e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Phone *</label>
+                    <input className="form-input" type="tel" placeholder="082 123 4567" value={selections.phone} onChange={e => update('phone', e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Message / Notes</label>
+                    <textarea className="form-input" rows="3" placeholder="Any specific requirements..."
+                      value={selections.message} onChange={e => update('message', e.target.value)} style={{resize:'vertical'}} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Navigation */}
+          <div className="nav-buttons">
+            {step > 1 && (
+              <button className="btn btn-outline" onClick={() => setStep(s => s - 1)}>← Back</button>
+            )}
+            {step < 4 ? (
+              <button className="btn btn-primary" onClick={() => canNext() && setStep(s => s + 1)} disabled={!canNext()}>
+                Continue →
+              </button>
+            ) : (
+              <button className="btn btn-primary" onClick={() => alert('✅ Quote request submitted!\n\nIn the live system, this would:\n• Email the quote PDF to the customer\n• Notify Grand Slam via WhatsApp\n• Save to the lead CRM')}>
+                📩 Submit Quote Request
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ── MAIN APP ──
+    function App() {
+      const [pricing, setPricing] = useState(() => loadPricing());
+      const [showAdmin, setShowAdmin] = useState(false);
+
+      useEffect(() => { savePricing(pricing); }, [pricing]);
+
+      const handleReset = () => {
+        if (confirm('Reset all pricing to defaults? This cannot be undone.')) {
+          setPricing(DEFAULT_PRICING);
+        }
+      };
+
+      return (
+        <div className="app">
+          {showAdmin ? (
+            <AdminPanel pricing={pricing} onUpdate={setPricing} onClose={() => setShowAdmin(false)} />
+          ) : (
+            <>
+              <div className="header">
+                <div>
+                  <div className="header-logo">🎾 Grand Slam Surfacing</div>
+                  <div style={{fontSize:10,opacity:0.8}}>Instant Quote Calculator</div>
+                </div>
+                <div className="header-actions">
+                  <button className="btn btn-ghost btn-sm" onClick={handleReset} title="Reset pricing">↺</button>
+                </div>
+              </div>
+              <QuoteWizard pricing={pricing} onOpenAdmin={() => setShowAdmin(true)} />
+            </>
+          )}
+
+          {/* Admin toggle button */}
+          <button className="admin-toggle" onClick={() => setShowAdmin(a => !a)} title={showAdmin ? 'Back to Quote Wizard' : 'Pricing Admin'}>
+            {showAdmin ? '✕' : '⚙️'}
+          </button>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
