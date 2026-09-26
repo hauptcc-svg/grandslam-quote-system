@@ -697,20 +697,6 @@
               <div className="price-note" style={{marginTop:6}}>{quote.courtBreakdown.map(cb=>`${cb.count}× ${cb.icon} ${cb.name}`).join(' · ')}</div>
             </div>}
 
-            {/* Court Design - Branded for Quote */}
-            {Object.keys(selections.zoneColours||{}).length > 0 && (
-              <CourtPreview
-                courtType={selections.courtTypes[0]}
-                insideColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.inside)||{}).hex||'#4CAF50'}
-                outsideColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.outside)||{}).hex||'#888'}
-                lineColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.lines)||{}).hex||'#fff'}
-                goalCircleColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.goalCircles)||{}).hex}
-                centerCircleColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.centerCircle)||{}).hex}
-                clientName={selections.name}
-                showHeader={true} showFooter={true}
-              />
-            )}
-
             <div style={{marginTop:14}}>
               <div className="form-group"><label className="form-label">Client / Organisation Name *</label><input className="form-input" placeholder="e.g. Pearson High School" value={selections.name} onChange={e=>update('name',e.target.value)}/></div>
               <div className="form-group"><label className="form-label">Contact Person</label><input className="form-input" placeholder="Full name" value={selections.contact||''} onChange={e=>update('contact',e.target.value)}/></div>
