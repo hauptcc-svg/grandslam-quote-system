@@ -275,7 +275,7 @@
       const uc=(i,f,v)=>{const a=[...pricing.conditions];a[i]={...a[i],[f]:f==='multiplier'?parseFloat(v)||1:v};onUpdate({...pricing,conditions:a});};
       const up=(i,f,v)=>{const a=[...pricing.provinces];a[i]={...a[i],[f]:f==='surcharge'?parseFloat(v)||0:v};onUpdate({...pricing,provinces:a});};
       const ue=(i,f,v)=>{const a=[...pricing.extras];a[i]={...a[i],[f]:f==='price'?parseInt(v)||0:v};onUpdate({...pricing,extras:a});};
-      const ae=()=>{onUpdate({...pricing,extras:[...pricing.extras,{id:'ex_'+Date.now(),name:'New Extra',price:0,unit:'per court',icon:'📦'}]});};
+      const addExtra=()=>{onUpdate({...pricing,extras:[...pricing.extras,{id:'ex_'+Date.now(),name:'New Extra',price:0,unit:'per court',icon:'📦'}]});};
       const re=i=>{const a=pricing.extras.filter((_,j)=>j!==i);onUpdate({...pricing,extras:a});};
 
       return (
@@ -307,7 +307,7 @@
             <table className="admin-table"><thead><tr><th>Name</th><th>Price (R)</th><th>Unit</th><th></th></tr></thead><tbody>
               {pricing.extras.map((e,i)=><tr key={e.id}><td><input value={e.name} onChange={ev=>ue(i,'name',ev.target.value)}/></td><td><input type="number" value={e.price} onChange={ev=>ue(i,'price',ev.target.value)}/></td><td><input value={e.unit} style={{width:80}} onChange={ev=>ue(i,'unit',ev.target.value)}/></td><td><button className="btn btn-danger btn-xs" onClick={()=>re(i)}>✕</button></td></tr>)}
             </tbody></table>
-            <button className="btn btn-outline btn-sm admin-add-btn" onClick={ae}>+ Add Extra</button>
+            <button className="btn btn-outline btn-sm admin-add-btn" onClick={addExtra}>+ Add Extra</button>
           </div>
         </div>
       );
@@ -442,7 +442,7 @@
               <div className="checklist-item"><input type="checkbox"/> Crew briefed on spec</div>
               <div className="checklist-item"><input type="checkbox"/> Client access confirmed</div>
               <div className="checklist-item"><input type="checkbox"/> Weather window checked (48h no rain)</div>
-              <div className="checklist-item"><input type="checkbox"/> Surface prep: pressure wash + crack repair</div>
+              <div className="checklist-item"><input type="checkbox"/> Surface prep: Pressure wash + crack repair</div>
               <div className="checklist-item"><input type="checkbox"/> Acrylic coats applied & cured</div>
               <div className="checklist-item"><input type="checkbox"/> Line marking per spec</div>
               <div className="checklist-item"><input type="checkbox"/> Equipment installed (posts, fencing, lighting)</div>
