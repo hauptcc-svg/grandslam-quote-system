@@ -668,40 +668,18 @@
                 if (!selections.zoneColours || Object.keys(selections.zoneColours).length === 0) initZoneColours(ct);
                 const zones = pricing.courtZones[ct] || [];
                 return zones.map(zone => (
-                  <div key={zone.id} style={{marginBottom:10}}>
-                    <div style={{fontSize:10,fontWeight:600,color:'var(--grey-700)',marginBottom:4,textTransform:'uppercase',letterSpacing:'0.3px'}}>{zone.name}</div>
-                    <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                  <div key={zone.id} style={{marginBottom:8}}>
+                    <label style={{fontSize:10,fontWeight:600,color:'var(--grey-500)',display:'block',marginBottom:3}}>{zone.name}</label>
+                    <select className="form-select" value={selections.zoneColours[zone.id] || ''} onChange={e=>setZoneColour(zone.id, e.target.value)}>
+                      <option value="">Default</option>
                       {pricing.colourPalette.map(c => (
-                        <div key={c.id} onClick={()=>setZoneColour(zone.id, c.id)}
-                          style={{
-                            width:36,height:36,borderRadius:'50%',background:c.hex,
-                            border:selections.zoneColours[zone.id]===c.id?'3px solid var(--green)':'2px solid var(--grey-300)',
-                            cursor:'pointer',transition:'all 0.15s',position:'relative',
-                            boxShadow:selections.zoneColours[zone.id]===c.id?'0 0 0 2px rgba(26,138,63,0.3)':'none'
-                          }}
-                          title={`${c.name}${c.surcharge>0?` +R${c.surcharge}`:''}`}>
-                          {selections.zoneColours[zone.id]===c.id && <span style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',fontSize:14}}>✓</span>}
-                        </div>
+                        <option key={c.id} value={c.id}>{c.name}{c.surcharge>0?` (+R${c.surcharge}/court)`:' (included)'}</option>
                       ))}
-                    </div>
-                    {selections.zoneColours[zone.id] && (()=>{const col=pricing.colourPalette.find(c=>c.id===selections.zoneColours[zone.id]);return col?<div style={{fontSize:9,color:col.surcharge>0?'var(--orange)':'var(--green-dark)',marginTop:2}}>{col.name}{col.surcharge>0?` (+R${col.surcharge}/court)`:''}</div>:null;})()}
+                    </select>
                   </div>
                 ));
               })()}
             </div>}
-
-            {/* Court Design Preview */}
-            {selections.courtTypes.length > 0 && Object.keys(selections.zoneColours||{}).length > 0 && (
-              <CourtPreview
-                courtType={selections.courtTypes[0]}
-                insideColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.inside)||{}).hex||'#4CAF50'}
-                outsideColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.outside)||{}).hex||'#888'}
-                lineColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.lines)||{}).hex||'#fff'}
-                goalCircleColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.goalCircles)||{}).hex}
-                centerCircleColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.centerCircle)||{}).hex}
-                showHeader={false} showFooter={false}
-              />
-            )}
           </div>)}
           {step===3 && (<div>
             <div className="form-group"><label className="form-label">Optional Extras</label>
