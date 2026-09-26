@@ -86,6 +86,20 @@
     .extra-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--grey-300); display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.15s; flex-shrink: 0; }
     .extra-row.selected .extra-check { background: var(--green); border-color: var(--green); color: white; }
 
+    /* Colour swatches */
+    .colour-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .colour-swatch { border: 2px solid var(--grey-200); border-radius: var(--radius); padding: 10px; cursor: pointer; transition: all 0.15s; background: var(--white); display: flex; align-items: center; gap: 10px; }
+    .colour-swatch.selected { border-color: var(--green); background: var(--green-light); }
+    .colour-dot { width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.1); flex-shrink: 0; }
+    .colour-dot.dual { background: none !important; position: relative; overflow: hidden; }
+    .colour-dot.dual::after { content: ''; position: absolute; top: 0; right: 0; width: 50%; height: 100%; border-radius: 0 50% 50% 0; }
+    .colour-info { flex: 1; min-width: 0; }
+    .colour-name { font-size: 12px; font-weight: 600; }
+    .colour-tier { font-size: 9px; color: var(--grey-500); }
+    .colour-price { font-size: 11px; font-weight: 700; }
+    .colour-price.free { color: var(--green-dark); }
+    .colour-price.premium { color: var(--orange); }
+
     .price-card { background: var(--white); border: 2px solid var(--green); border-radius: var(--radius); padding: 14px; margin-top: 14px; }
     .price-estimate { font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 800; color: var(--green-dark); text-align: center; }
     .price-label { font-size: 10px; color: var(--grey-500); text-align: center; margin-bottom: 4px; text-transform: uppercase; }
@@ -222,11 +236,22 @@
         { id: 'seating', name: 'Seating (basic)', price: 12000, unit: 'per court', icon: '🪑' },
         { id: 'netposts', name: 'Net Posts & Nets', price: 4500, unit: 'per pair', icon: '🥅' },
       ],
+      colours: [
+        { id: 'green', name: 'Court Green', hex: '#4CAF50', sports: ['tennis','netball','basketball','pickleball','futsal','combo'], surcharge: 0, tier: 'standard' },
+        { id: 'terracotta', name: 'Terracotta', hex: '#CC6644', sports: ['tennis'], surcharge: 6000, tier: 'premium' },
+        { id: 'blue', name: 'Court Blue', hex: '#2196F3', sports: ['tennis','netball','pickleball','combo'], surcharge: 2500, tier: 'standard' },
+        { id: 'red', name: 'Sport Red', hex: '#E53935', sports: ['netball','basketball','futsal','combo'], surcharge: 2500, tier: 'standard' },
+        { id: 'dark_green', name: 'Dark Green', hex: '#2E7D32', sports: ['tennis','netball','futsal','combo'], surcharge: 1500, tier: 'standard' },
+        { id: 'grey', name: 'Slate Grey', hex: '#607D8B', sports: ['tennis','basketball','combo'], surcharge: 0, tier: 'standard' },
+        { id: 'two_tone', name: 'Two-Tone (Green/Terracotta)', hex: '#4CAF50', hex2: '#CC6644', sports: ['tennis'], surcharge: 9000, tier: 'premium' },
+        { id: 'blue_green', name: 'Blue/Green Combo', hex: '#2196F3', hex2: '#4CAF50', sports: ['netball','combo'], surcharge: 7500, tier: 'premium' },
+        { id: 'custom_school', name: 'Custom School Colours', hex: 'linear-gradient(135deg, #333 0%, #666 100%)', sports: ['tennis','netball','basketball','combo'], surcharge: 15000, tier: 'custom' },
+      ],
     };
 
     // ── PRICING ENGINE ──
     function calculatePrice(selections, pricing) {
-      const { service, courtTypes, courtCount, condition, province, extras } = selections;
+      const { service, courtTypes, courtCount, condition, province, extras, colour } = selections;
       if (!service || !courtTypes.length || !condition || !province) return null;
       const svc = pricing.services.find(s => s.id === service);
       const cond = pricing.conditions.find(c => c.id === condition);
@@ -244,7 +269,14 @@
       let vd = 0;
       if (totalCourts >= 5) { vd = Math.round(subtotal * 0.07); breakdown.push({ label: `Volume discount (${totalCourts} courts, 7%)`, amount: -vd }); }
       let et=0; extras.forEach(eid => { const ex = pricing.extras.find(e=>e.id===eid); if(ex){ const ec=ex.price*totalCourts; et+=ec; breakdown.push({label:`${ex.name} (${totalCourts}× R${ex.price.toLocaleString()})`,amount:ec});}});
-      const pv = subtotal-vd+et, vat = Math.round(pv*0.15), total = pv+vat;
+      // Colour surcharge
+      let colourCost = 0;
+      if (colour) {
+        const col = pricing.colours.find(c=>c.id===colour);
+        if (col && col.surcharge > 0) { colourCost = col.surcharge * totalCourts; breakdown.push({label:`Colour: ${col.name} (${totalCourts}× R${col.surcharge.toLocaleString()})`,amount:colourCost}); }
+        else if (col) { breakdown.push({label:`Colour: ${col.name} (included)`,amount:0}); }
+      }
+      const pv = subtotal-vd+et+colourCost, vat = Math.round(pv*0.15), total = pv+vat;
       return { subtotal:Math.round(subtotal), volumeDiscount:vd, extrasTotal:et, preVat:Math.round(pv), vat, total, totalCourts, totalArea, breakdown, courtBreakdown };
     }
 
@@ -277,6 +309,9 @@
       const ue=(i,f,v)=>{const a=[...pricing.extras];a[i]={...a[i],[f]:f==='price'?parseInt(v)||0:v};onUpdate({...pricing,extras:a});};
       const addExtra=()=>{onUpdate({...pricing,extras:[...pricing.extras,{id:'ex_'+Date.now(),name:'New Extra',price:0,unit:'per court',icon:'📦'}]});};
       const re=i=>{const a=pricing.extras.filter((_,j)=>j!==i);onUpdate({...pricing,extras:a});};
+      const ucol=(i,f,v)=>{const a=[...pricing.colours];a[i]={...a[i],[f]:f==='surcharge'?parseInt(v)||0:v};onUpdate({...pricing,colours:a});};
+      const addColour=()=>{onUpdate({...pricing,colours:[...pricing.colours,{id:'c_'+Date.now(),name:'New Colour',hex:'#888888',sports:['tennis','netball','combo'],surcharge:0,tier:'standard'}]});};
+      const rcol=i=>{const a=pricing.colours.filter((_,j)=>j!==i);onUpdate({...pricing,colours:a});};
 
       return (
         <div>
@@ -309,6 +344,19 @@
             </tbody></table>
             <button className="btn btn-outline btn-sm admin-add-btn" onClick={addExtra}>+ Add Extra</button>
           </div>
+          <div className="admin-section"><h3>🎨 Court Colours</h3>
+            <table className="admin-table"><thead><tr><th>Name</th><th>Colour</th><th>Sports</th><th>Surcharge (R)</th><th>Tier</th><th></th></tr></thead><tbody>
+              {pricing.colours.map((c,i)=><tr key={c.id}>
+                <td><input value={c.name} onChange={e=>ucol(i,'name',e.target.value)}/></td>
+                <td><input value={c.hex} style={{width:70}} onChange={e=>ucol(i,'hex',e.target.value)}/>{c.hex2&&<input value={c.hex2} style={{width:70,marginLeft:2}} onChange={e=>ucol(i,'hex2',e.target.value)}/>}</td>
+                <td><input value={c.sports.join(',')} style={{width:120}} onChange={e=>ucol(i,'sports',e.target.value.split(',').map(s=>s.trim()))}/></td>
+                <td><input type="number" value={c.surcharge} onChange={e=>ucol(i,'surcharge',e.target.value)}/></td>
+                <td><select value={c.tier} onChange={e=>ucol(i,'tier',e.target.value)} style={{fontSize:10,padding:'4px'}}><option value="standard">Standard</option><option value="premium">Premium</option><option value="custom">Custom</option></select></td>
+                <td><button className="btn btn-danger btn-xs" onClick={()=>rcol(i)}>✕</button></td>
+              </tr>)}
+            </tbody></table>
+            <button className="btn btn-outline btn-sm admin-add-btn" onClick={addColour}>+ Add Colour</button>
+          </div>
         </div>
       );
     }
@@ -316,7 +364,7 @@
     // ── QUOTE WIZARD ──
     function QuoteWizard({ pricing, onQuoteSubmit }) {
       const [step, setStep] = useState(1);
-      const [selections, setSelections] = useState({ service:'', courtTypes:[], courtCount:'1', condition:'', province:'', projectType:'', extras:[], name:'', email:'', phone:'', message:'' });
+      const [selections, setSelections] = useState({ service:'', courtTypes:[], courtCount:'1', condition:'', province:'', projectType:'', extras:[], colour:'', name:'', email:'', phone:'', message:'' });
       const update = (f,v) => setSelections(s=>({...s,[f]:v}));
       const toggleArr = (f,v) => setSelections(s=>({...s,[f]:s[f].includes(v)?s[f].filter(x=>x!==v):[...s[f],v]}));
       const quote = useMemo(()=>calculatePrice(selections,pricing),[selections,pricing]);
@@ -324,7 +372,7 @@
       const handleSubmit = () => {
         const q = { id: generateId(), ...selections, quote: calculatePrice(selections,pricing), status: 'sent', createdAt: new Date().toISOString(), followUpDate: null, notes: '' };
         onQuoteSubmit(q);
-        setSelections({ service:'', courtTypes:[], courtCount:'1', condition:'', province:'', projectType:'', extras:[], name:'', email:'', phone:'', message:'' });
+        setSelections({ service:'', courtTypes:[], courtCount:'1', condition:'', province:'', projectType:'', extras:[], colour:'', name:'', email:'', phone:'', message:'' });
         setStep(1);
       };
 
@@ -373,6 +421,28 @@
                 {pricing.projectTypes.map(pt=><option key={pt.id} value={pt.id}>{pt.name} — {pt.warrantyYears}-year warranty</option>)}
               </select>
             </div>
+
+            {(selections.courtTypes.length > 0) && <div className="form-group">
+              <label className="form-label">🎨 Court Colours</label>
+              <div className="colour-grid">
+                {pricing.colours.filter(c => c.sports.some(s => selections.courtTypes.includes(s))).map(c => (
+                  <div key={c.id} className={`colour-swatch ${selections.colour===c.id?'selected':''}`} onClick={()=>update('colour',selections.colour===c.id?'':c.id)}>
+                    {c.hex2 ? (
+                      <div className="colour-dot dual" style={{background:c.hex}}>
+                        <div style={{position:'absolute',top:0,right:0,width:'50%',height:'100%',background:c.hex2,borderRadius:'0 50% 50% 0'}}></div>
+                      </div>
+                    ) : (
+                      <div className="colour-dot" style={{background:c.hex}}></div>
+                    )}
+                    <div className="colour-info">
+                      <div className="colour-name">{c.name}</div>
+                      <div className="colour-tier">{c.tier==='standard'?'Standard':c.tier==='premium'?'Premium':'Custom'}</div>
+                    </div>
+                    <div className={`colour-price ${c.surcharge===0?'free':'premium'}`}>{c.surcharge===0?'FREE':`+R${c.surcharge.toLocaleString()}/court`}</div>
+                  </div>
+                ))}
+              </div>
+            </div>}
           </div>)}
           {step===3 && (<div>
             <div className="form-group"><label className="form-label">Optional Extras</label>
