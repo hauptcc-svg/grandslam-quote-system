@@ -100,6 +100,14 @@
     .colour-price.free { color: var(--green-dark); }
     .colour-price.premium { color: var(--orange); }
 
+    /* Court Preview */
+    .court-preview { background: var(--white); border: 1.5px solid var(--grey-300); border-radius: var(--radius); overflow: hidden; margin-top: 12px; }
+    .court-preview-header { background: var(--grey-900); color: white; text-align: center; padding: 8px; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 12px; letter-spacing: 0.5px; }
+    .court-preview-footer { background: var(--grey-100); text-align: center; padding: 6px; font-size: 10px; color: var(--grey-700); font-weight: 600; }
+    .court-preview svg { display: block; width: 100%; height: auto; }
+    .court-preview-label { font-size: 8px; fill: #fff; font-family: 'Montserrat', sans-serif; font-weight: 700; text-anchor: middle; }
+    .court-preview-dim { font-size: 7px; fill: rgba(255,255,255,0.7); text-anchor: middle; }
+
     .price-card { background: var(--white); border: 2px solid var(--green); border-radius: var(--radius); padding: 14px; margin-top: 14px; }
     .price-estimate { font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 800; color: var(--green-dark); text-align: center; }
     .price-label { font-size: 10px; color: var(--grey-500); text-align: center; margin-bottom: 4px; text-transform: uppercase; }
@@ -300,6 +308,67 @@
     // ── TOAST ──
     function Toast({ msg, onDone }) { useEffect(() => { const t = setTimeout(onDone, 2500); return () => clearTimeout(t); }, []); return <div className="toast">{msg}</div>; }
 
+    // ── COURT PREVIEW SVG ──
+    function CourtPreview({ courtType, insideColour, outsideColour, clientName, showHeader, showFooter }) {
+      const LAYOUTS = {
+        tennis: { vb:'0 0 300 500', outer:[20,30,260,440], inner:[50,60,200,380], net:[50,250,200,2],
+          svcBox1:[70,220,160,30], svcBox2:[70,280,160,30], svcLine:[150,220,2,90],
+          singles:[90,60,120,380], label:'TENNIS', dims:'23.8m × 11m' },
+        netball: { vb:'0 0 500 300', outer:[20,20,460,260], inner:[40,40,420,220], net:[40,150,420,2],
+          goalCircle1:[250,40,40,40], goalCircle2:[250,220,40,40], centerCircle:[225,125,50,50],
+          third1:[180,40,2,220], third2:[320,40,2,220], label:'NETBALL', dims:'30.5m × 15.3m' },
+        basketball: { vb:'0 0 300 500', outer:[15,25,270,450], inner:[35,45,230,410], net:[35,250,230,2],
+          key1:[100,45,100,100], key2:[100,355,100,100], arc1:[150,145,40,40], arc2:[150,315,40,40],
+          label:'BASKETBALL', dims:'28m × 15m' },
+        pickleball: { vb:'0 0 300 500', outer:[40,50,220,400], inner:[50,60,200,380], net:[50,250,200,2],
+          nvz1:[70,200,160,50], nvz2:[70,250,160,50], svcL:[150,200,2,100], label:'PICKLEBALL', dims:'13.4m × 6.1m' },
+        futsal: { vb:'0 0 300 500', outer:[15,25,270,450], inner:[30,40,240,420], net:[30,250,240,2],
+          pen1:[30,130,60,120], pen2:[210,250,60,120], center:[150,250,40,40], arc1:[30,130,80,60], arc2:[190,310,80,60],
+          label:'FUTSAL', dims:'40m × 20m' },
+        combo: { vb:'0 0 400 400', outer:[20,20,360,360], inner:[50,50,300,300], net:[50,200,300,2],
+          multi:[150,50,100,300], label:'MULTI-PURPOSE', dims:'Variable' },
+      };
+      const L = LAYOUTS[courtType] || LAYOUTS.combo;
+      const VB = L.vb.split(' ').slice(2).map(Number);
+      const inside = insideColour || '#4CAF50';
+      const outside = outsideColour || '#CC6644';
+
+      return (
+        <div className="court-preview">
+          {showHeader && <div className="court-preview-header">🎾 GRAND SLAM SURFACING</div>}
+          <svg viewBox={L.vb}>
+            {/* Outside court / runoff */}
+            <rect x={L.outer[0]} y={L.outer[1]} width={L.outer[2]} height={L.outer[3]} fill={outside} rx="4"/>
+            {/* Inside playing surface */}
+            <rect x={L.inner[0]} y={L.inner[1]} width={L.inner[2]} height={L.inner[3]} fill={inside} rx="2"/>
+            {/* Net line */}
+            <rect x={L.net[0]} y={L.net[1]} width={L.net[2]} height={L.net[3]} fill="#fff" opacity="0.9"/>
+            {/* Sport-specific markings */}
+            {L.svcBox1 && <rect x={L.svcBox1[0]} y={L.svcBox1[1]} width={L.svcBox1[2]} height={L.svcBox1[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.7"/>}
+            {L.svcBox2 && <rect x={L.svcBox2[0]} y={L.svcBox2[1]} width={L.svcBox2[2]} height={L.svcBox2[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.7"/>}
+            {L.svcLine && <rect x={L.svcLine[0]} y={L.svcLine[1]} width={L.svcLine[2]} height={L.svcLine[3]} fill="#fff" opacity="0.5"/>}
+            {L.singles && <rect x={L.singles[0]} y={L.singles[1]} width={L.singles[2]} height={L.singles[3]} fill="none" stroke="#fff" strokeWidth="1" strokeDasharray="6,4" opacity="0.6"/>}
+            {L.goalCircle1 && <circle cx={L.goalCircle1[0]} cy={L.goalCircle1[1]} rx={L.goalCircle1[2]} ry={L.goalCircle1[3]} fill="none" stroke="#fff" strokeWidth="2" opacity="0.8"/>}
+            {L.goalCircle2 && <circle cx={L.goalCircle2[0]} cy={L.goalCircle2[1]} rx={L.goalCircle2[2]} ry={L.goalCircle2[3]} fill="none" stroke="#fff" strokeWidth="2" opacity="0.8"/>}
+            {L.centerCircle && <circle cx={L.centerCircle[0]} cy={L.centerCircle[1]} r={L.centerCircle[2]} fill="none" stroke="#fff" strokeWidth="2" opacity="0.6"/>}
+            {L.third1 && <rect x={L.third1[0]} y={L.third1[1]} width={L.third1[2]} height={L.third1[3]} fill="#fff" opacity="0.5"/>}
+            {L.third2 && <rect x={L.third2[0]} y={L.third2[1]} width={L.third2[2]} height={L.third2[3]} fill="#fff" opacity="0.5"/>}
+            {L.key1 && <rect x={L.key1[0]} y={L.key1[1]} width={L.key1[2]} height={L.key1[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.7"/>}
+            {L.key2 && <rect x={L.key2[0]} y={L.key2[1]} width={L.key2[2]} height={L.key2[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.7"/>}
+            {L.arc1 && <circle cx={L.arc1[0]} cy={L.arc1[1]} r={L.arc1[2]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.5"/>}
+            {L.arc2 && <circle cx={L.arc2[0]} cy={L.arc2[1]} r={L.arc2[2]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.5"/>}
+            {L.nvz1 && <rect x={L.nvz1[0]} y={L.nvz1[1]} width={L.nvz1[2]} height={L.nvz1[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.5"/>}
+            {L.nvz2 && <rect x={L.nvz2[0]} y={L.nvz2[1]} width={L.nvz2[2]} height={L.nvz2[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.5"/>}
+            {L.multi && <rect x={L.multi[0]} y={L.multi[1]} width={L.multi[2]} height={L.multi[3]} fill="none" stroke="#fff" strokeWidth="1.5" strokeDasharray="8,4" opacity="0.5"/>}
+            {/* Labels */}
+            <text x={VB[0]/2} y={VB[1]-8} className="court-preview-label">{L.label}</text>
+            <text x={VB[0]/2} y={VB[1]-1} className="court-preview-dim">{L.dims}</text>
+          </svg>
+          {showFooter && <div className="court-preview-footer">{clientName || 'Client Name'}</div>}
+        </div>
+      );
+    }
+
     // ── ADMIN PANEL ──
     function AdminPanel({ pricing, onUpdate }) {
       const us=(i,f,v)=>{const a=[...pricing.services];a[i]={...a[i],[f]:f==='baseRate'?parseFloat(v)||0:v};onUpdate({...pricing,services:a});};
@@ -443,6 +512,16 @@
                 ))}
               </div>
             </div>}
+
+            {/* Court Design Preview */}
+            {selections.courtTypes.length > 0 && selections.colour && (
+              <CourtPreview
+                courtType={selections.courtTypes[0]}
+                insideColour={(pricing.colours.find(c=>c.id===selections.colour)||{}).hex}
+                outsideColour={(pricing.colours.find(c=>c.id===selections.colour)||{}).hex2 || '#888'}
+                showHeader={false} showFooter={false}
+              />
+            )}
           </div>)}
           {step===3 && (<div>
             <div className="form-group"><label className="form-label">Optional Extras</label>
@@ -459,6 +538,18 @@
               <div className="price-line" style={{marginTop:4,paddingTop:6,borderTop:'2px solid var(--green)'}}><span>Total (incl. 15% VAT)</span><span style={{color:'var(--green-dark)'}}>R{quote.total.toLocaleString()}</span></div>
               <div className="price-note" style={{marginTop:6}}>{quote.courtBreakdown.map(cb=>`${cb.count}× ${cb.icon} ${cb.name}`).join(' · ')}</div>
             </div>}
+
+            {/* Court Design - Branded for Quote */}
+            {selections.colour && (
+              <CourtPreview
+                courtType={selections.courtTypes[0]}
+                insideColour={(pricing.colours.find(c=>c.id===selections.colour)||{}).hex}
+                outsideColour={(pricing.colours.find(c=>c.id===selections.colour)||{}).hex2 || '#888'}
+                clientName={selections.name}
+                showHeader={true} showFooter={true}
+              />
+            )}
+
             <div style={{marginTop:14}}>
               <div className="form-group"><label className="form-label">Client / Organisation Name *</label><input className="form-input" placeholder="e.g. Pearson High School" value={selections.name} onChange={e=>update('name',e.target.value)}/></div>
               <div className="form-group"><label className="form-label">Contact Person</label><input className="form-input" placeholder="Full name" value={selections.contact||''} onChange={e=>update('contact',e.target.value)}/></div>
