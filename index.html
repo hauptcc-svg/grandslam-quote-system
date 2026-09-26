@@ -244,22 +244,56 @@
         { id: 'seating', name: 'Seating (basic)', price: 12000, unit: 'per court', icon: '🪑' },
         { id: 'netposts', name: 'Net Posts & Nets', price: 4500, unit: 'per pair', icon: '🥅' },
       ],
-      colours: [
-        { id: 'green', name: 'Court Green', hex: '#4CAF50', sports: ['tennis','netball','basketball','pickleball','futsal','combo'], surcharge: 0, tier: 'standard' },
-        { id: 'terracotta', name: 'Terracotta', hex: '#CC6644', sports: ['tennis'], surcharge: 6000, tier: 'premium' },
-        { id: 'blue', name: 'Court Blue', hex: '#2196F3', sports: ['tennis','netball','pickleball','combo'], surcharge: 2500, tier: 'standard' },
-        { id: 'red', name: 'Sport Red', hex: '#E53935', sports: ['netball','basketball','futsal','combo'], surcharge: 2500, tier: 'standard' },
-        { id: 'dark_green', name: 'Dark Green', hex: '#2E7D32', sports: ['tennis','netball','futsal','combo'], surcharge: 1500, tier: 'standard' },
-        { id: 'grey', name: 'Slate Grey', hex: '#607D8B', sports: ['tennis','basketball','combo'], surcharge: 0, tier: 'standard' },
-        { id: 'two_tone', name: 'Two-Tone (Green/Terracotta)', hex: '#4CAF50', hex2: '#CC6644', sports: ['tennis'], surcharge: 9000, tier: 'premium' },
-        { id: 'blue_green', name: 'Blue/Green Combo', hex: '#2196F3', hex2: '#4CAF50', sports: ['netball','combo'], surcharge: 7500, tier: 'premium' },
-        { id: 'custom_school', name: 'Custom School Colours', hex: 'linear-gradient(135deg, #333 0%, #666 100%)', sports: ['tennis','netball','basketball','combo'], surcharge: 15000, tier: 'custom' },
+      colourPalette: [
+        { id:'green', name:'Court Green', hex:'#4CAF50', surcharge:0 },
+        { id:'terracotta', name:'Terracotta', hex:'#CC6644', surcharge:6000 },
+        { id:'blue', name:'Court Blue', hex:'#2196F3', surcharge:2500 },
+        { id:'red', name:'Sport Red', hex:'#E53935', surcharge:2500 },
+        { id:'dark_green', name:'Dark Green', hex:'#2E7D32', surcharge:1500 },
+        { id:'grey', name:'Slate Grey', hex:'#607D8B', surcharge:0 },
+        { id:'white', name:'Line White', hex:'#FFFFFF', surcharge:0 },
+        { id:'yellow', name:'Line Yellow', hex:'#FFD600', surcharge:0 },
+        { id:'orange', name:'Vibrant Orange', hex:'#FF9800', surcharge:3000 },
       ],
+      courtZones: {
+        tennis: [
+          { id:'inside', name:'Court Surface', defaultColour:'green' },
+          { id:'outside', name:'Border / Runoff', defaultColour:'terracotta' },
+          { id:'lines', name:'Line Markings', defaultColour:'white' },
+        ],
+        netball: [
+          { id:'inside', name:'Court Surface', defaultColour:'blue' },
+          { id:'outside', name:'Border / Runoff', defaultColour:'grey' },
+          { id:'goalCircles', name:'Goal Circles', defaultColour:'red' },
+          { id:'centerCircle', name:'Centre Circle', defaultColour:'white' },
+          { id:'lines', name:'Line Markings', defaultColour:'white' },
+        ],
+        basketball: [
+          { id:'inside', name:'Court Surface', defaultColour:'green' },
+          { id:'outside', name:'Border / Runoff', defaultColour:'grey' },
+          { id:'lines', name:'Line Markings', defaultColour:'white' },
+        ],
+        pickleball: [
+          { id:'inside', name:'Court Surface', defaultColour:'blue' },
+          { id:'outside', name:'Border / Runoff', defaultColour:'green' },
+          { id:'lines', name:'Line Markings', defaultColour:'white' },
+        ],
+        futsal: [
+          { id:'inside', name:'Court Surface', defaultColour:'green' },
+          { id:'outside', name:'Border / Runoff', defaultColour:'grey' },
+          { id:'lines', name:'Line Markings', defaultColour:'white' },
+        ],
+        combo: [
+          { id:'inside', name:'Court Surface', defaultColour:'green' },
+          { id:'outside', name:'Border / Runoff', defaultColour:'grey' },
+          { id:'lines', name:'Line Markings', defaultColour:'white' },
+        ],
+      },
     };
 
     // ── PRICING ENGINE ──
     function calculatePrice(selections, pricing) {
-      const { service, courtTypes, courtCount, condition, province, extras, colour } = selections;
+      const { service, courtTypes, courtCount, condition, province, extras, zoneColours } = selections;
       if (!service || !courtTypes.length || !condition || !province) return null;
       const svc = pricing.services.find(s => s.id === service);
       const cond = pricing.conditions.find(c => c.id === condition);
@@ -277,12 +311,20 @@
       let vd = 0;
       if (totalCourts >= 5) { vd = Math.round(subtotal * 0.07); breakdown.push({ label: `Volume discount (${totalCourts} courts, 7%)`, amount: -vd }); }
       let et=0; extras.forEach(eid => { const ex = pricing.extras.find(e=>e.id===eid); if(ex){ const ec=ex.price*totalCourts; et+=ec; breakdown.push({label:`${ex.name} (${totalCourts}× R${ex.price.toLocaleString()})`,amount:ec});}});
-      // Colour surcharge
+      // Zone colour surcharges
       let colourCost = 0;
-      if (colour) {
-        const col = pricing.colours.find(c=>c.id===colour);
-        if (col && col.surcharge > 0) { colourCost = col.surcharge * totalCourts; breakdown.push({label:`Colour: ${col.name} (${totalCourts}× R${col.surcharge.toLocaleString()})`,amount:colourCost}); }
-        else if (col) { breakdown.push({label:`Colour: ${col.name} (included)`,amount:0}); }
+      const primaryCourt = courtTypes[0];
+      const zones = pricing.courtZones[primaryCourt] || [];
+      if (zoneColours) {
+        Object.entries(zoneColours).forEach(([zoneId, colourId]) => {
+          const col = pricing.colourPalette.find(c=>c.id===colourId);
+          if (col && col.surcharge > 0) {
+            const zone = zones.find(z=>z.id===zoneId);
+            const zoneName = zone ? zone.name : zoneId;
+            colourCost += col.surcharge * totalCourts;
+            breakdown.push({label:`Colour — ${zoneName}: ${col.name} (${totalCourts}× R${col.surcharge.toLocaleString()})`,amount:col.surcharge*totalCourts});
+          }
+        });
       }
       const pv = subtotal-vd+et+colourCost, vat = Math.round(pv*0.15), total = pv+vat;
       return { subtotal:Math.round(subtotal), volumeDiscount:vd, extrasTotal:et, preVat:Math.round(pv), vat, total, totalCourts, totalArea, breakdown, courtBreakdown };
@@ -309,60 +351,188 @@
     function Toast({ msg, onDone }) { useEffect(() => { const t = setTimeout(onDone, 2500); return () => clearTimeout(t); }, []); return <div className="toast">{msg}</div>; }
 
     // ── COURT PREVIEW SVG ──
-    function CourtPreview({ courtType, insideColour, outsideColour, clientName, showHeader, showFooter }) {
-      const LAYOUTS = {
-        tennis: { vb:'0 0 300 500', outer:[20,30,260,440], inner:[50,60,200,380], net:[50,250,200,2],
-          svcBox1:[70,220,160,30], svcBox2:[70,280,160,30], svcLine:[150,220,2,90],
-          singles:[90,60,120,380], label:'TENNIS', dims:'23.8m × 11m' },
-        netball: { vb:'0 0 500 300', outer:[20,20,460,260], inner:[40,40,420,220], net:[40,150,420,2],
-          goalCircle1:[250,40,40,40], goalCircle2:[250,220,40,40], centerCircle:[225,125,50,50],
-          third1:[180,40,2,220], third2:[320,40,2,220], label:'NETBALL', dims:'30.5m × 15.3m' },
-        basketball: { vb:'0 0 300 500', outer:[15,25,270,450], inner:[35,45,230,410], net:[35,250,230,2],
-          key1:[100,45,100,100], key2:[100,355,100,100], arc1:[150,145,40,40], arc2:[150,315,40,40],
-          label:'BASKETBALL', dims:'28m × 15m' },
-        pickleball: { vb:'0 0 300 500', outer:[40,50,220,400], inner:[50,60,200,380], net:[50,250,200,2],
-          nvz1:[70,200,160,50], nvz2:[70,250,160,50], svcL:[150,200,2,100], label:'PICKLEBALL', dims:'13.4m × 6.1m' },
-        futsal: { vb:'0 0 300 500', outer:[15,25,270,450], inner:[30,40,240,420], net:[30,250,240,2],
-          pen1:[30,130,60,120], pen2:[210,250,60,120], center:[150,250,40,40], arc1:[30,130,80,60], arc2:[190,310,80,60],
-          label:'FUTSAL', dims:'40m × 20m' },
-        combo: { vb:'0 0 400 400', outer:[20,20,360,360], inner:[50,50,300,300], net:[50,200,300,2],
-          multi:[150,50,100,300], label:'MULTI-PURPOSE', dims:'Variable' },
+    function CourtPreview({ courtType, insideColour, outsideColour, lineColour, goalCircleColour, centerCircleColour, clientName, showHeader, showFooter }) {
+      // Accurate court dimensions in meters (ITF / IFNA / FIBA / USAPA / FIFA standards)
+      const COURTS = {
+        tennis: {
+          length: 23.77, width: 10.97,  // doubles court
+          singlesWidth: 8.23,
+          alleyWidth: 1.37,
+          svcLineDist: 6.40,  // service line from net
+          netPos: 11.885,     // net from baseline (half length)
+          runoffEnd: 3.66, runoffSide: 3.05,
+          label: 'TENNIS', dims: '23.77m × 10.97m',
+        },
+        netball: {
+          length: 30.5, width: 15.25,
+          goalCircleR: 4.9,
+          centerCircleR: 0.9,
+          thirdDist: 10.17,   // thirds at 1/3 of length
+          runoffEnd: 3.05, runoffSide: 3.05,
+          label: 'NETBALL', dims: '30.50m × 15.25m',
+        },
+        basketball: {
+          length: 28.0, width: 15.0,
+          threePtR: 6.75,
+          keyWidth: 4.9, keyDepth: 5.8,
+          ftLineDist: 5.8,    // free throw line from baseline
+          centerCircleR: 1.8,
+          runoffEnd: 3.0, runoffSide: 2.0,
+          label: 'BASKETBALL', dims: '28.00m × 15.00m',
+        },
+        pickleball: {
+          length: 13.41, width: 6.10,
+          nvzDepth: 2.13,     // non-volley zone from net
+          runoffEnd: 3.05, runoffSide: 2.13,
+          label: 'PICKLEBALL', dims: '13.41m × 6.10m',
+        },
+        futsal: {
+          length: 40.0, width: 20.0,
+          penDist: 6.0,       // penalty area from goal line
+          penWidth: 6.0,      // penalty area extends 6m into court
+          centerCircleR: 3.0,
+          runoffEnd: 2.0, runoffSide: 2.0,
+          label: 'FUTSAL', dims: '40.00m × 20.00m',
+        },
+        combo: {
+          length: 36.0, width: 18.0,
+          runoffEnd: 2.5, runoffSide: 2.5,
+          label: 'MULTI-PURPOSE', dims: 'Variable',
+        },
       };
-      const L = LAYOUTS[courtType] || LAYOUTS.combo;
-      const VB = L.vb.split(' ').slice(2).map(Number);
+
+      const C = COURTS[courtType] || COURTS.combo;
+      const SCALE = 8; // SVG units per meter
+      const canvasW = (C.length + C.runoffEnd * 2) * SCALE;
+      const canvasH = (C.width + C.runoffSide * 2) * SCALE;
+      const ox = C.runoffEnd * SCALE;     // origin X (start of playing surface)
+      const oy = C.runoffSide * SCALE;    // origin Y
+      const pw = C.length * SCALE;        // playing width (SVG units)
+      const ph = C.width * SCALE;         // playing height
       const inside = insideColour || '#4CAF50';
       const outside = outsideColour || '#CC6644';
+      const lc = lineColour || '#FFFFFF';
+      const gc = goalCircleColour || '#E53935';
+      const cc = centerCircleColour || '#FFFFFF';
 
       return (
         <div className="court-preview">
           {showHeader && <div className="court-preview-header">🎾 GRAND SLAM SURFACING</div>}
-          <svg viewBox={L.vb}>
-            {/* Outside court / runoff */}
-            <rect x={L.outer[0]} y={L.outer[1]} width={L.outer[2]} height={L.outer[3]} fill={outside} rx="4"/>
-            {/* Inside playing surface */}
-            <rect x={L.inner[0]} y={L.inner[1]} width={L.inner[2]} height={L.inner[3]} fill={inside} rx="2"/>
-            {/* Net line */}
-            <rect x={L.net[0]} y={L.net[1]} width={L.net[2]} height={L.net[3]} fill="#fff" opacity="0.9"/>
-            {/* Sport-specific markings */}
-            {L.svcBox1 && <rect x={L.svcBox1[0]} y={L.svcBox1[1]} width={L.svcBox1[2]} height={L.svcBox1[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.7"/>}
-            {L.svcBox2 && <rect x={L.svcBox2[0]} y={L.svcBox2[1]} width={L.svcBox2[2]} height={L.svcBox2[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.7"/>}
-            {L.svcLine && <rect x={L.svcLine[0]} y={L.svcLine[1]} width={L.svcLine[2]} height={L.svcLine[3]} fill="#fff" opacity="0.5"/>}
-            {L.singles && <rect x={L.singles[0]} y={L.singles[1]} width={L.singles[2]} height={L.singles[3]} fill="none" stroke="#fff" strokeWidth="1" strokeDasharray="6,4" opacity="0.6"/>}
-            {L.goalCircle1 && <circle cx={L.goalCircle1[0]} cy={L.goalCircle1[1]} rx={L.goalCircle1[2]} ry={L.goalCircle1[3]} fill="none" stroke="#fff" strokeWidth="2" opacity="0.8"/>}
-            {L.goalCircle2 && <circle cx={L.goalCircle2[0]} cy={L.goalCircle2[1]} rx={L.goalCircle2[2]} ry={L.goalCircle2[3]} fill="none" stroke="#fff" strokeWidth="2" opacity="0.8"/>}
-            {L.centerCircle && <circle cx={L.centerCircle[0]} cy={L.centerCircle[1]} r={L.centerCircle[2]} fill="none" stroke="#fff" strokeWidth="2" opacity="0.6"/>}
-            {L.third1 && <rect x={L.third1[0]} y={L.third1[1]} width={L.third1[2]} height={L.third1[3]} fill="#fff" opacity="0.5"/>}
-            {L.third2 && <rect x={L.third2[0]} y={L.third2[1]} width={L.third2[2]} height={L.third2[3]} fill="#fff" opacity="0.5"/>}
-            {L.key1 && <rect x={L.key1[0]} y={L.key1[1]} width={L.key1[2]} height={L.key1[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.7"/>}
-            {L.key2 && <rect x={L.key2[0]} y={L.key2[1]} width={L.key2[2]} height={L.key2[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.7"/>}
-            {L.arc1 && <circle cx={L.arc1[0]} cy={L.arc1[1]} r={L.arc1[2]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.5"/>}
-            {L.arc2 && <circle cx={L.arc2[0]} cy={L.arc2[1]} r={L.arc2[2]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.5"/>}
-            {L.nvz1 && <rect x={L.nvz1[0]} y={L.nvz1[1]} width={L.nvz1[2]} height={L.nvz1[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.5"/>}
-            {L.nvz2 && <rect x={L.nvz2[0]} y={L.nvz2[1]} width={L.nvz2[2]} height={L.nvz2[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.5"/>}
-            {L.multi && <rect x={L.multi[0]} y={L.multi[1]} width={L.multi[2]} height={L.multi[3]} fill="none" stroke="#fff" strokeWidth="1.5" strokeDasharray="8,4" opacity="0.5"/>}
+          <svg viewBox={`0 0 ${canvasW} ${canvasH}`} preserveAspectRatio="xMidYMid meet">
+            {/* Runoff / outside */}
+            <rect x={0} y={0} width={canvasW} height={canvasH} fill={outside} rx={canvasW*0.01}/>
+            {/* Playing surface */}
+            <rect x={ox} y={oy} width={pw} height={ph} fill={inside} rx={canvasW*0.005}/>
+
+            <g stroke={lc} fill="none" opacity="0.85">
+              {/* ── TENNIS ── */}
+              {courtType === 'tennis' && (<>
+                {/* Doubles sidelines */}
+                <rect x={ox} y={oy} width={pw} height={ph} strokeWidth={SCALE*0.35}/>
+                {/* Singles sidelines */}
+                {(() => { const sy = oy + C.alleyWidth * SCALE; const sh = (C.width - 2*C.alleyWidth) * SCALE;
+                  return <rect x={ox} y={sy} width={pw} height={sh} strokeWidth={SCALE*0.25} strokeDasharray={`${SCALE*0.6},${SCALE*0.4}`}/>; })()}
+                {/* Service line */}
+                {(() => { const s1 = ox + (C.length/2 - C.svcLineDist) * SCALE; const s2 = ox + (C.length/2 + C.svcLineDist) * SCALE;
+                  return <><line x1={s1} y1={oy} x2={s1} y2={oy+ph} strokeWidth={SCALE*0.28}/>
+                           <line x1={s2} y1={oy} x2={s2} y2={oy+ph} strokeWidth={SCALE*0.28}/></>; })()}
+                {/* Center service line */}
+                <line x1={ox} y1={oy+ph/2} x2={ox + (C.length/2 - C.svcLineDist)*SCALE} y2={oy+ph/2} strokeWidth={SCALE*0.25}/>
+                <line x1={ox + (C.length/2 + C.svcLineDist)*SCALE} y1={oy+ph/2} x2={ox+pw} y2={oy+ph/2} strokeWidth={SCALE*0.25}/>
+                {/* Net */}
+                <line x1={ox+pw/2} y1={oy} x2={ox+pw/2} y2={oy+ph} strokeWidth={SCALE*0.7} opacity="0.95"/>
+                {/* Center marks on baselines */}
+                <line x1={ox} y1={oy+ph/2} x2={ox+SCALE*0.8} y2={oy+ph/2} strokeWidth={SCALE*0.28}/>
+                <line x1={ox+pw} y1={oy+ph/2} x2={ox+pw-SCALE*0.8} y2={oy+ph/2} strokeWidth={SCALE*0.28}/>
+              </>)}
+
+              {/* ── NETBALL ── */}
+              {courtType === 'netball' && (<>
+                <rect x={ox} y={oy} width={pw} height={ph} strokeWidth={SCALE*0.35}/>
+                {/* Third lines */}
+                <line x1={ox + C.thirdDist*SCALE} y1={oy} x2={ox + C.thirdDist*SCALE} y2={oy+ph} strokeWidth={SCALE*0.28}/>
+                <line x1={ox+pw - C.thirdDist*SCALE} y1={oy} x2={ox+pw - C.thirdDist*SCALE} y2={oy+ph} strokeWidth={SCALE*0.28}/>
+                {/* Center circle */}
+                <circle cx={ox+pw/2} cy={oy+ph/2} r={C.centerCircleR*SCALE} stroke={cc} strokeWidth={SCALE*0.28}/>
+                {/* Goal circles */}
+                <circle cx={ox} cy={oy+ph/2} r={C.goalCircleR*SCALE} stroke={gc} strokeWidth={SCALE*0.35}/>
+                <circle cx={ox+pw} cy={oy+ph/2} r={C.goalCircleR*SCALE} stroke={gc} strokeWidth={SCALE*0.35}/>
+                {/* Goal circle hashes */}
+                {(() => { const R=C.goalCircleR*SCALE; const cx=ox; const cy=oy+ph/2;
+                  return <><line x1={cx} y1={cy-R-SCALE*1.5} x2={cx} y2={cy-R+SCALE*1.5} stroke={gc} strokeWidth={SCALE*0.25}/>
+                           <line x1={cx+R-SCALE*1.5} y1={cy} x2={cx+R+SCALE*1.5} y2={cy} stroke={gc} strokeWidth={SCALE*0.25}/></>; })()}
+                {/* Transverse line */}
+                <line x1={ox+pw/2} y1={oy} x2={ox+pw/2} y2={oy+ph} strokeWidth={SCALE*0.5} opacity="0.9"/>
+              </>)}
+
+              {/* ── BASKETBALL ── */}
+              {courtType === 'basketball' && (<>
+                <rect x={ox} y={oy} width={pw} height={ph} strokeWidth={SCALE*0.35}/>
+                {/* Center circle */}
+                <circle cx={ox+pw/2} cy={oy+ph/2} r={C.centerCircleR*SCALE} strokeWidth={SCALE*0.28}/>
+                {/* Center line */}
+                <line x1={ox+pw/2} y1={oy} x2={ox+pw/2} y2={oy+ph} strokeWidth={SCALE*0.28}/>
+                {/* Keys (restricted areas) */}
+                {(() => {
+                  const kw = C.keyWidth * SCALE; const kd = C.keyDepth * SCALE;
+                  const ky1 = oy + (ph - kw) / 2;
+                  return <><rect x={ox} y={ky1} width={kd} height={kw} strokeWidth={SCALE*0.28}/>
+                           <rect x={ox+pw-kd} y={ky1} width={kd} height={kw} strokeWidth={SCALE*0.28}/></>; })()}
+                {/* Free throw lines */}
+                <line x1={ox+C.ftLineDist*SCALE} y1={oy+(ph-C.keyWidth*SCALE)/2} x2={ox+C.ftLineDist*SCALE} y2={oy+(ph+C.keyWidth*SCALE)/2} strokeWidth={SCALE*0.3}/>
+                <line x1={ox+pw-C.ftLineDist*SCALE} y1={oy+(ph-C.keyWidth*SCALE)/2} x2={ox+pw-C.ftLineDist*SCALE} y2={oy+(ph+C.keyWidth*SCALE)/2} strokeWidth={SCALE*0.3}/>
+                {/* 3-point arcs */}
+                <path d={`M${ox},${oy+(ph-C.threePtR*SCALE*1.2)} A${C.threePtR*SCALE},${C.threePtR*SCALE} 0 0,1 ${ox},${oy+(ph+C.threePtR*SCALE*1.2)}`} strokeWidth={SCALE*0.28}/>
+                <path d={`M${ox+pw},${oy+(ph-C.threePtR*SCALE*1.2)} A${C.threePtR*SCALE},${C.threePtR*SCALE} 0 0,0 ${ox+pw},${oy+(ph+C.threePtR*SCALE*1.2)}`} strokeWidth={SCALE*0.28}/>
+              </>)}
+
+              {/* ── PICKLEBALL ── */}
+              {courtType === 'pickleball' && (<>
+                <rect x={ox} y={oy} width={pw} height={ph} strokeWidth={SCALE*0.35}/>
+                {/* Net */}
+                <line x1={ox+pw/2} y1={oy} x2={ox+pw/2} y2={oy+ph} strokeWidth={SCALE*0.7} opacity="0.95"/>
+                {/* Non-volley zone lines */}
+                <line x1={ox+pw/2-C.nvzDepth*SCALE} y1={oy} x2={ox+pw/2-C.nvzDepth*SCALE} y2={oy+ph} strokeWidth={SCALE*0.28}/>
+                <line x1={ox+pw/2+C.nvzDepth*SCALE} y1={oy} x2={ox+pw/2+C.nvzDepth*SCALE} y2={oy+ph} strokeWidth={SCALE*0.28}/>
+                {/* Center marks */}
+                <line x1={ox} y1={oy+ph/2} x2={ox+SCALE*0.6} y2={oy+ph/2} strokeWidth={SCALE*0.25}/>
+                <line x1={ox+pw} y1={oy+ph/2} x2={ox+pw-SCALE*0.6} y2={oy+ph/2} strokeWidth={SCALE*0.25}/>
+              </>)}
+
+              {/* ── FUTSAL ── */}
+              {courtType === 'futsal' && (<>
+                <rect x={ox} y={oy} width={pw} height={ph} strokeWidth={SCALE*0.35}/>
+                {/* Center line + circle */}
+                <line x1={ox+pw/2} y1={oy} x2={ox+pw/2} y2={oy+ph} strokeWidth={SCALE*0.28}/>
+                <circle cx={ox+pw/2} cy={oy+ph/2} r={C.centerCircleR*SCALE} strokeWidth={SCALE*0.28}/>
+                {/* Penalty areas */}
+                <rect x={ox} y={oy+(ph-C.penWidth*SCALE)/2} width={C.penDist*SCALE} height={C.penWidth*SCALE} strokeWidth={SCALE*0.3}/>
+                <rect x={ox+pw-C.penDist*SCALE} y={oy+(ph-C.penWidth*SCALE)/2} width={C.penDist*SCALE} height={C.penWidth*SCALE} strokeWidth={SCALE*0.3}/>
+                {/* Penalty arcs */}
+                {(() => {
+                  const px = ox + C.penDist * SCALE; const py = oy + ph/2;
+                  return <>
+                    <path d={`M${px+SCALE*3},${py-SCALE*2} A${SCALE*6},${SCALE*6} 0 0,1 ${px+SCALE*3},${py+SCALE*2}`} strokeWidth={SCALE*0.25}/>
+                    <path d={`M${ox+pw-C.penDist*SCALE-SCALE*3},${py-SCALE*2} A${SCALE*6},${SCALE*6} 0 0,0 ${ox+pw-C.penDist*SCALE-SCALE*3},${py+SCALE*2}`} strokeWidth={SCALE*0.25}/>
+                  </>; })()}
+                {/* Corner arcs */}
+                {[[ox,oy],[ox+pw,oy],[ox,oy+ph],[ox+pw,oy+ph]].map(([cx,cy],i)=>{
+                  const sx = cx===ox ? 1 : -1; const sy = cy===oy ? 1 : -1;
+                  return <path key={i} d={`M${cx+sx*SCALE*2},${cy} A${SCALE*2},${SCALE*2} 0 0,${sx*sy>0?0:1} ${cx},${cy+sy*SCALE*2}`} strokeWidth={SCALE*0.22}/>; })}
+              </>)}
+
+              {/* ── MULTI-PURPOSE ── */}
+              {courtType === 'combo' && (<>
+                <rect x={ox} y={oy} width={pw} height={ph} strokeWidth={SCALE*0.35}/>
+                <line x1={ox+pw/2} y1={oy} x2={ox+pw/2} y2={oy+ph} strokeWidth={SCALE*0.28}/>
+                <line x1={ox} y1={oy+ph/2} x2={ox+pw} y2={oy+ph/2} strokeWidth={SCALE*0.28}/>
+                <circle cx={ox+pw/2} cy={oy+ph/2} r={SCALE*3} strokeWidth={SCALE*0.28}/>
+              </>)}
+            </g>
+
             {/* Labels */}
-            <text x={VB[0]/2} y={VB[1]-8} className="court-preview-label">{L.label}</text>
-            <text x={VB[0]/2} y={VB[1]-1} className="court-preview-dim">{L.dims}</text>
+            <text x={canvasW/2} y={SCALE*1.2} fill="#fff" fontSize={SCALE*1.2} fontFamily="Montserrat,sans-serif" fontWeight="700" textAnchor="middle" opacity="0.9">{C.label}</text>
+            <text x={canvasW/2} y={SCALE*2.0} fill="rgba(255,255,255,0.6)" fontSize={SCALE*0.8} textAnchor="middle">{C.dims}</text>
           </svg>
           {showFooter && <div className="court-preview-footer">{clientName || 'Client Name'}</div>}
         </div>
@@ -378,9 +548,9 @@
       const ue=(i,f,v)=>{const a=[...pricing.extras];a[i]={...a[i],[f]:f==='price'?parseInt(v)||0:v};onUpdate({...pricing,extras:a});};
       const addExtra=()=>{onUpdate({...pricing,extras:[...pricing.extras,{id:'ex_'+Date.now(),name:'New Extra',price:0,unit:'per court',icon:'📦'}]});};
       const re=i=>{const a=pricing.extras.filter((_,j)=>j!==i);onUpdate({...pricing,extras:a});};
-      const ucol=(i,f,v)=>{const a=[...pricing.colours];a[i]={...a[i],[f]:f==='surcharge'?parseInt(v)||0:v};onUpdate({...pricing,colours:a});};
-      const addColour=()=>{onUpdate({...pricing,colours:[...pricing.colours,{id:'c_'+Date.now(),name:'New Colour',hex:'#888888',sports:['tennis','netball','combo'],surcharge:0,tier:'standard'}]});};
-      const rcol=i=>{const a=pricing.colours.filter((_,j)=>j!==i);onUpdate({...pricing,colours:a});};
+      const ucol=(i,f,v)=>{const a=[...pricing.colourPalette];a[i]={...a[i],[f]:f==='surcharge'?parseInt(v)||0:v};onUpdate({...pricing,colourPalette:a});};
+      const addColour=()=>{onUpdate({...pricing,colourPalette:[...pricing.colourPalette,{id:'c_'+Date.now(),name:'New Colour',hex:'#888888',surcharge:0}]});};
+      const rcol=i=>{const a=pricing.colourPalette.filter((_,j)=>j!==i);onUpdate({...pricing,colourPalette:a});};
 
       return (
         <div>
@@ -413,14 +583,12 @@
             </tbody></table>
             <button className="btn btn-outline btn-sm admin-add-btn" onClick={addExtra}>+ Add Extra</button>
           </div>
-          <div className="admin-section"><h3>🎨 Court Colours</h3>
-            <table className="admin-table"><thead><tr><th>Name</th><th>Colour</th><th>Sports</th><th>Surcharge (R)</th><th>Tier</th><th></th></tr></thead><tbody>
-              {pricing.colours.map((c,i)=><tr key={c.id}>
+          <div className="admin-section"><h3>🎨 Colour Palette</h3>
+            <table className="admin-table"><thead><tr><th>Name</th><th>Hex</th><th>Surcharge (R)</th><th></th></tr></thead><tbody>
+              {pricing.colourPalette.map((c,i)=><tr key={c.id}>
                 <td><input value={c.name} onChange={e=>ucol(i,'name',e.target.value)}/></td>
-                <td><input value={c.hex} style={{width:70}} onChange={e=>ucol(i,'hex',e.target.value)}/>{c.hex2&&<input value={c.hex2} style={{width:70,marginLeft:2}} onChange={e=>ucol(i,'hex2',e.target.value)}/>}</td>
-                <td><input value={c.sports.join(',')} style={{width:120}} onChange={e=>ucol(i,'sports',e.target.value.split(',').map(s=>s.trim()))}/></td>
+                <td><input value={c.hex} style={{width:70}} onChange={e=>ucol(i,'hex',e.target.value)}/></td>
                 <td><input type="number" value={c.surcharge} onChange={e=>ucol(i,'surcharge',e.target.value)}/></td>
-                <td><select value={c.tier} onChange={e=>ucol(i,'tier',e.target.value)} style={{fontSize:10,padding:'4px'}}><option value="standard">Standard</option><option value="premium">Premium</option><option value="custom">Custom</option></select></td>
                 <td><button className="btn btn-danger btn-xs" onClick={()=>rcol(i)}>✕</button></td>
               </tr>)}
             </tbody></table>
@@ -433,15 +601,17 @@
     // ── QUOTE WIZARD ──
     function QuoteWizard({ pricing, onQuoteSubmit }) {
       const [step, setStep] = useState(1);
-      const [selections, setSelections] = useState({ service:'', courtTypes:[], courtCount:'1', condition:'', province:'', projectType:'', extras:[], colour:'', name:'', email:'', phone:'', message:'' });
+      const [selections, setSelections] = useState({ service:'', courtTypes:[], courtCount:'1', condition:'', province:'', projectType:'', extras:[], zoneColours:{}, name:'', email:'', phone:'', message:'', contact:'', address:'' });
       const update = (f,v) => setSelections(s=>({...s,[f]:v}));
       const toggleArr = (f,v) => setSelections(s=>({...s,[f]:s[f].includes(v)?s[f].filter(x=>x!==v):[...s[f],v]}));
+      const setZoneColour = (zoneId, colourId) => setSelections(s=>({...s, zoneColours:{...s.zoneColours, [zoneId]:s.zoneColours[zoneId]===colourId?'':colourId}}));
+      const initZoneColours = (ct) => { const z=pricing.courtZones[ct]; if(z){ const zc={}; z.forEach(zn=>{zc[zn.id]=zn.defaultColour}); setSelections(s=>({...s, zoneColours:zc})); }};
       const quote = useMemo(()=>calculatePrice(selections,pricing),[selections,pricing]);
       const canNext = () => { if(step===1) return selections.service && selections.courtTypes.length>0; if(step===2) return selections.condition && selections.province && selections.projectType; return true; };
       const handleSubmit = () => {
         const q = { id: generateId(), ...selections, quote: calculatePrice(selections,pricing), status: 'sent', createdAt: new Date().toISOString(), followUpDate: null, notes: '' };
         onQuoteSubmit(q);
-        setSelections({ service:'', courtTypes:[], courtCount:'1', condition:'', province:'', projectType:'', extras:[], colour:'', name:'', email:'', phone:'', message:'' });
+        setSelections({ service:'', courtTypes:[], courtCount:'1', condition:'', province:'', projectType:'', extras:[], zoneColours:{}, name:'', email:'', phone:'', message:'', contact:'', address:'' });
         setStep(1);
       };
 
@@ -493,32 +663,42 @@
 
             {(selections.courtTypes.length > 0) && <div className="form-group">
               <label className="form-label">🎨 Court Colours</label>
-              <div className="colour-grid">
-                {pricing.colours.filter(c => c.sports.some(s => selections.courtTypes.includes(s))).map(c => (
-                  <div key={c.id} className={`colour-swatch ${selections.colour===c.id?'selected':''}`} onClick={()=>update('colour',selections.colour===c.id?'':c.id)}>
-                    {c.hex2 ? (
-                      <div className="colour-dot dual" style={{background:c.hex}}>
-                        <div style={{position:'absolute',top:0,right:0,width:'50%',height:'100%',background:c.hex2,borderRadius:'0 50% 50% 0'}}></div>
-                      </div>
-                    ) : (
-                      <div className="colour-dot" style={{background:c.hex}}></div>
-                    )}
-                    <div className="colour-info">
-                      <div className="colour-name">{c.name}</div>
-                      <div className="colour-tier">{c.tier==='standard'?'Standard':c.tier==='premium'?'Premium':'Custom'}</div>
+              {(() => {
+                const ct = selections.courtTypes[0];
+                if (!selections.zoneColours || Object.keys(selections.zoneColours).length === 0) initZoneColours(ct);
+                const zones = pricing.courtZones[ct] || [];
+                return zones.map(zone => (
+                  <div key={zone.id} style={{marginBottom:10}}>
+                    <div style={{fontSize:10,fontWeight:600,color:'var(--grey-700)',marginBottom:4,textTransform:'uppercase',letterSpacing:'0.3px'}}>{zone.name}</div>
+                    <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                      {pricing.colourPalette.map(c => (
+                        <div key={c.id} onClick={()=>setZoneColour(zone.id, c.id)}
+                          style={{
+                            width:36,height:36,borderRadius:'50%',background:c.hex,
+                            border:selections.zoneColours[zone.id]===c.id?'3px solid var(--green)':'2px solid var(--grey-300)',
+                            cursor:'pointer',transition:'all 0.15s',position:'relative',
+                            boxShadow:selections.zoneColours[zone.id]===c.id?'0 0 0 2px rgba(26,138,63,0.3)':'none'
+                          }}
+                          title={`${c.name}${c.surcharge>0?` +R${c.surcharge}`:''}`}>
+                          {selections.zoneColours[zone.id]===c.id && <span style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',fontSize:14}}>✓</span>}
+                        </div>
+                      ))}
                     </div>
-                    <div className={`colour-price ${c.surcharge===0?'free':'premium'}`}>{c.surcharge===0?'FREE':`+R${c.surcharge.toLocaleString()}/court`}</div>
+                    {selections.zoneColours[zone.id] && (()=>{const col=pricing.colourPalette.find(c=>c.id===selections.zoneColours[zone.id]);return col?<div style={{fontSize:9,color:col.surcharge>0?'var(--orange)':'var(--green-dark)',marginTop:2}}>{col.name}{col.surcharge>0?` (+R${col.surcharge}/court)`:''}</div>:null;})()}
                   </div>
-                ))}
-              </div>
+                ));
+              })()}
             </div>}
 
             {/* Court Design Preview */}
-            {selections.courtTypes.length > 0 && selections.colour && (
+            {selections.courtTypes.length > 0 && Object.keys(selections.zoneColours||{}).length > 0 && (
               <CourtPreview
                 courtType={selections.courtTypes[0]}
-                insideColour={(pricing.colours.find(c=>c.id===selections.colour)||{}).hex}
-                outsideColour={(pricing.colours.find(c=>c.id===selections.colour)||{}).hex2 || '#888'}
+                insideColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.inside)||{}).hex||'#4CAF50'}
+                outsideColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.outside)||{}).hex||'#888'}
+                lineColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.lines)||{}).hex||'#fff'}
+                goalCircleColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.goalCircles)||{}).hex}
+                centerCircleColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.centerCircle)||{}).hex}
                 showHeader={false} showFooter={false}
               />
             )}
@@ -540,11 +720,14 @@
             </div>}
 
             {/* Court Design - Branded for Quote */}
-            {selections.colour && (
+            {Object.keys(selections.zoneColours||{}).length > 0 && (
               <CourtPreview
                 courtType={selections.courtTypes[0]}
-                insideColour={(pricing.colours.find(c=>c.id===selections.colour)||{}).hex}
-                outsideColour={(pricing.colours.find(c=>c.id===selections.colour)||{}).hex2 || '#888'}
+                insideColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.inside)||{}).hex||'#4CAF50'}
+                outsideColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.outside)||{}).hex||'#888'}
+                lineColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.lines)||{}).hex||'#fff'}
+                goalCircleColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.goalCircles)||{}).hex}
+                centerCircleColour={(pricing.colourPalette.find(c=>c.id===selections.zoneColours.centerCircle)||{}).hex}
                 clientName={selections.name}
                 showHeader={true} showFooter={true}
               />

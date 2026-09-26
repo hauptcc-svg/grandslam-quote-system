@@ -8,27 +8,26 @@
     :root { --green:#1a8a3f; --green-dark:#0f5c28; --grey-200:#e5e7eb; --grey-700:#374151; --grey-900:#111827; --white:#fff; }
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter',-apple-system,sans-serif; background:var(--white); display:flex; justify-content:center; align-items:center; min-height:100vh; padding:16px; }
-    .embed { max-width:360px; width:100%; background:var(--white); border:2px solid var(--grey-200); border-radius:12px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.08); }
+    .embed { max-width:380px; width:100%; background:var(--white); border:2px solid var(--grey-200); border-radius:12px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.08); }
     .embed-header { background:var(--grey-900); color:var(--white); text-align:center; padding:10px 14px; font-family:'Montserrat',sans-serif; font-weight:800; font-size:13px; letter-spacing:0.5px; }
     .embed-body { padding:12px; }
     .embed-label { font-size:10px; font-weight:600; color:var(--grey-700); text-transform:uppercase; margin-bottom:6px; letter-spacing:0.3px; }
-    .court-types { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:12px; }
+    .court-types { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:14px; }
     .ct-btn { padding:8px 4px; border:2px solid var(--grey-200); border-radius:8px; background:var(--white); cursor:pointer; font-size:10px; font-weight:600; text-align:center; transition:all 0.15s; font-family:'Inter',sans-serif; }
     .ct-btn:hover { border-color:var(--green); }
     .ct-btn.selected { border-color:var(--green); background:#e8f5e9; color:var(--green-dark); }
     .ct-icon { font-size:20px; display:block; margin-bottom:2px; }
-    .colour-picker { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px; }
-    .col-btn { display:flex; align-items:center; gap:8px; padding:8px; border:2px solid var(--grey-200); border-radius:8px; background:var(--white); cursor:pointer; font-family:'Inter',sans-serif; transition:all 0.15s; }
-    .col-btn:hover { border-color:var(--green); }
-    .col-btn.selected { border-color:var(--green); background:#e8f5e9; }
-    .col-dot { width:24px; height:24px; border-radius:50%; border:1px solid rgba(0,0,0,0.1); flex-shrink:0; }
-    .col-name { font-size:11px; font-weight:600; }
-    .preview { border:1px solid var(--grey-200); border-radius:8px; overflow:hidden; margin-bottom:12px; }
+    .zone-label { font-size:9px; font-weight:600; color:var(--grey-700); text-transform:uppercase; margin:8px 0 4px; }
+    .zone-swatches { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:4px; }
+    .zone-dot { width:30px; height:30px; border-radius:50%; border:2px solid var(--grey-200); cursor:pointer; transition:all 0.15s; position:relative; }
+    .zone-dot.selected { border-color:var(--green); box-shadow:0 0 0 2px rgba(26,138,63,0.25); }
+    .zone-dot.selected::after { content:'✓'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:12px; color:white; text-shadow:0 0 2px rgba(0,0,0,0.5); }
+    .zone-colour-name { font-size:8px; color:#888; margin-bottom:2px; }
+    .preview { border:1px solid var(--grey-200); border-radius:8px; overflow:hidden; margin:10px 0; }
     .preview svg { display:block; width:100%; height:auto; }
     .cta { display:block; width:100%; padding:12px; background:var(--green); color:var(--white); border:none; border-radius:8px; font-family:'Montserrat',sans-serif; font-weight:700; font-size:14px; cursor:pointer; text-align:center; text-decoration:none; transition:all 0.15s; }
     .cta:hover { background:var(--green-dark); }
     .embed-footer { text-align:center; padding:8px; font-size:9px; color:#999; }
-    @media (min-width:600px) { .embed { max-width:400px; } }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 </head>
@@ -38,15 +37,24 @@
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script type="text/babel">
-const { useState } = React;
+const { useState, useMemo } = React;
 
-const COURTS = [
-  { id:'tennis', name:'Tennis', icon:'🎾', vb:'0 0 300 500', outer:[20,30,260,440], inner:[50,60,200,380], net:[50,250,200,2], svcBox1:[70,220,160,30], svcBox2:[70,280,160,30], svcLine:[150,220,2,90], singles:[90,60,120,380], label:'TENNIS', dims:'23.8m × 11m' },
-  { id:'netball', name:'Netball', icon:'🏐', vb:'0 0 500 300', outer:[20,20,460,260], inner:[40,40,420,220], net:[40,150,420,2], goalCircle1:[250,40,40,40], goalCircle2:[250,220,40,40], centerCircle:[225,125,50,50], third1:[180,40,2,220], third2:[320,40,2,220], label:'NETBALL', dims:'30.5m × 15.3m' },
-  { id:'basketball', name:'Basketball', icon:'🏀', vb:'0 0 300 500', outer:[15,25,270,450], inner:[35,45,230,410], net:[35,250,230,2], key1:[100,45,100,100], key2:[100,355,100,100], arc1:[150,145,40,40], arc2:[150,315,40,40], label:'BASKETBALL', dims:'28m × 15m' },
-  { id:'pickleball', name:'Pickleball', icon:'🏓', vb:'0 0 300 500', outer:[40,50,220,400], inner:[50,60,200,380], net:[50,250,200,2], nvz1:[70,200,160,50], nvz2:[70,250,160,50], svcL:[150,200,2,100], label:'PICKLEBALL', dims:'13.4m × 6.1m' },
-  { id:'futsal', name:'Futsal', icon:'⚽', vb:'0 0 300 500', outer:[15,25,270,450], inner:[30,40,240,420], net:[30,250,240,2], pen1:[30,130,60,120], pen2:[210,250,60,120], center:[150,250,40,40], arc1:[30,130,80,60], arc2:[190,310,80,60], label:'FUTSAL', dims:'40m × 20m' },
-  { id:'combo', name:'Multi', icon:'🏟️', vb:'0 0 400 400', outer:[20,20,360,360], inner:[50,50,300,300], net:[50,200,300,2], multi:[150,50,100,300], label:'MULTI', dims:'Variable' },
+const COURTS = {
+  tennis: { length:23.77, width:10.97, singlesWidth:8.23, alleyWidth:1.37, svcLineDist:6.40, runoffEnd:3.66, runoffSide:3.05, label:'TENNIS', dims:'23.77m × 10.97m' },
+  netball: { length:30.5, width:15.25, goalCircleR:4.9, centerCircleR:0.9, thirdDist:10.17, runoffEnd:3.05, runoffSide:3.05, label:'NETBALL', dims:'30.50m × 15.25m' },
+  basketball: { length:28.0, width:15.0, threePtR:6.75, keyWidth:4.9, keyDepth:5.8, ftLineDist:5.8, centerCircleR:1.8, runoffEnd:3.0, runoffSide:2.0, label:'BASKETBALL', dims:'28.00m × 15.00m' },
+  pickleball: { length:13.41, width:6.10, nvzDepth:2.13, runoffEnd:3.05, runoffSide:2.13, label:'PICKLEBALL', dims:'13.41m × 6.10m' },
+  futsal: { length:40.0, width:20.0, penDist:6.0, penWidth:6.0, centerCircleR:3.0, runoffEnd:2.0, runoffSide:2.0, label:'FUTSAL', dims:'40.00m × 20.00m' },
+  combo: { length:36.0, width:18.0, runoffEnd:2.5, runoffSide:2.5, label:'MULTI', dims:'Variable' },
+};
+
+const COURT_LIST = [
+  { id:'tennis', name:'Tennis', icon:'🎾' },
+  { id:'netball', name:'Netball', icon:'🏐' },
+  { id:'basketball', name:'Basketball', icon:'🏀' },
+  { id:'pickleball', name:'Pickleball', icon:'🏓' },
+  { id:'futsal', name:'Futsal', icon:'⚽' },
+  { id:'combo', name:'Multi', icon:'🏟️' },
 ];
 
 const COLOURS = [
@@ -56,35 +64,71 @@ const COLOURS = [
   { id:'red', name:'Sport Red', hex:'#E53935' },
   { id:'dark_green', name:'Dark Green', hex:'#2E7D32' },
   { id:'grey', name:'Slate Grey', hex:'#607D8B' },
+  { id:'white', name:'Line White', hex:'#FFFFFF' },
 ];
 
-function CourtPreview({ layout, inside, outside }) {
-  if (!layout) layout = COURTS[0];
-  const VB = layout.vb.split(' ').slice(2).map(Number);
+const ZONES = {
+  tennis: [{id:'inside',name:'Court Surface',def:'green'},{id:'outside',name:'Border',def:'terracotta'},{id:'lines',name:'Lines',def:'white'}],
+  netball: [{id:'inside',name:'Court',def:'blue'},{id:'outside',name:'Border',def:'grey'},{id:'goalCircles',name:'Goal Circles',def:'red'},{id:'centerCircle',name:'Centre Circle',def:'white'},{id:'lines',name:'Lines',def:'white'}],
+  basketball: [{id:'inside',name:'Court',def:'green'},{id:'outside',name:'Border',def:'grey'},{id:'lines',name:'Lines',def:'white'}],
+  pickleball: [{id:'inside',name:'Court',def:'blue'},{id:'outside',name:'Border',def:'green'},{id:'lines',name:'Lines',def:'white'}],
+  futsal: [{id:'inside',name:'Court',def:'green'},{id:'outside',name:'Border',def:'grey'},{id:'lines',name:'Lines',def:'white'}],
+  combo: [{id:'inside',name:'Court',def:'green'},{id:'outside',name:'Border',def:'grey'},{id:'lines',name:'Lines',def:'white'}],
+};
+
+const SCALE = 8;
+
+function CourtPreview({ courtType, zoneColours }) {
+  const C = COURTS[courtType] || COURTS.combo;
+  const cw = (C.length + C.runoffEnd*2) * SCALE;
+  const ch = (C.width + C.runoffSide*2) * SCALE;
+  const ox = C.runoffEnd * SCALE, oy = C.runoffSide * SCALE;
+  const pw = C.length * SCALE, ph = C.width * SCALE;
+  const getCol = (zoneId) => { const cid = zoneColours[zoneId]; const col = COLOURS.find(c=>c.id===cid); return col ? col.hex : '#888'; };
+
   return (
     <div className="preview">
-      <svg viewBox={layout.vb}>
-        <rect x={layout.outer[0]} y={layout.outer[1]} width={layout.outer[2]} height={layout.outer[3]} fill={outside} rx="4"/>
-        <rect x={layout.inner[0]} y={layout.inner[1]} width={layout.inner[2]} height={layout.inner[3]} fill={inside} rx="2"/>
-        <rect x={layout.net[0]} y={layout.net[1]} width={layout.net[2]} height={layout.net[3]} fill="#fff" opacity="0.9"/>
-        {layout.svcBox1&&<rect x={layout.svcBox1[0]} y={layout.svcBox1[1]} width={layout.svcBox1[2]} height={layout.svcBox1[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.7"/>}
-        {layout.svcBox2&&<rect x={layout.svcBox2[0]} y={layout.svcBox2[1]} width={layout.svcBox2[2]} height={layout.svcBox2[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.7"/>}
-        {layout.svcLine&&<rect x={layout.svcLine[0]} y={layout.svcLine[1]} width={layout.svcLine[2]} height={layout.svcLine[3]} fill="#fff" opacity="0.5"/>}
-        {layout.singles&&<rect x={layout.singles[0]} y={layout.singles[1]} width={layout.singles[2]} height={layout.singles[3]} fill="none" stroke="#fff" strokeWidth="1" strokeDasharray="6,4" opacity="0.6"/>}
-        {layout.goalCircle1&&<circle cx={layout.goalCircle1[0]} cy={layout.goalCircle1[1]} rx={layout.goalCircle1[2]} ry={layout.goalCircle1[3]} fill="none" stroke="#fff" strokeWidth="2" opacity="0.8"/>}
-        {layout.goalCircle2&&<circle cx={layout.goalCircle2[0]} cy={layout.goalCircle2[1]} rx={layout.goalCircle2[2]} ry={layout.goalCircle2[3]} fill="none" stroke="#fff" strokeWidth="2" opacity="0.8"/>}
-        {layout.centerCircle&&<circle cx={layout.centerCircle[0]} cy={layout.centerCircle[1]} r={layout.centerCircle[2]} fill="none" stroke="#fff" strokeWidth="2" opacity="0.6"/>}
-        {layout.third1&&<rect x={layout.third1[0]} y={layout.third1[1]} width={layout.third1[2]} height={layout.third1[3]} fill="#fff" opacity="0.5"/>}
-        {layout.third2&&<rect x={layout.third2[0]} y={layout.third2[1]} width={layout.third2[2]} height={layout.third2[3]} fill="#fff" opacity="0.5"/>}
-        {layout.key1&&<rect x={layout.key1[0]} y={layout.key1[1]} width={layout.key1[2]} height={layout.key1[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.7"/>}
-        {layout.key2&&<rect x={layout.key2[0]} y={layout.key2[1]} width={layout.key2[2]} height={layout.key2[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.7"/>}
-        {layout.arc1&&<circle cx={layout.arc1[0]} cy={layout.arc1[1]} r={layout.arc1[2]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.5"/>}
-        {layout.arc2&&<circle cx={layout.arc2[0]} cy={layout.arc2[1]} r={layout.arc2[2]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.5"/>}
-        {layout.nvz1&&<rect x={layout.nvz1[0]} y={layout.nvz1[1]} width={layout.nvz1[2]} height={layout.nvz1[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.5"/>}
-        {layout.nvz2&&<rect x={layout.nvz2[0]} y={layout.nvz2[1]} width={layout.nvz2[2]} height={layout.nvz2[3]} fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.5"/>}
-        {layout.multi&&<rect x={layout.multi[0]} y={layout.multi[1]} width={layout.multi[2]} height={layout.multi[3]} fill="none" stroke="#fff" strokeWidth="1.5" strokeDasharray="8,4" opacity="0.5"/>}
-        <text x={VB[0]/2} y={VB[1]-8} fill="#fff" fontSize="8" fontFamily="Montserrat,sans-serif" fontWeight="700" textAnchor="middle">{layout.label}</text>
-        <text x={VB[0]/2} y={VB[1]-1} fill="rgba(255,255,255,0.7)" fontSize="7" textAnchor="middle">{layout.dims}</text>
+      <svg viewBox={`0 0 ${cw} ${ch}`} preserveAspectRatio="xMidYMid meet">
+        <rect x={0} y={0} width={cw} height={ch} fill={getCol('outside')} rx={cw*0.01}/>
+        <rect x={ox} y={oy} width={pw} height={ph} fill={getCol('inside')} rx={cw*0.005}/>
+        <g stroke={getCol('lines')} fill="none" opacity="0.85">
+          {courtType === 'tennis' && (<>
+            <rect x={ox} y={oy} width={pw} height={ph} strokeWidth={SCALE*0.35}/>
+            {(()=>{const sy=oy+C.alleyWidth*SCALE;const sh=(C.width-2*C.alleyWidth)*SCALE;return <rect x={ox} y={sy} width={pw} height={sh} strokeWidth={SCALE*0.25} strokeDasharray={`${SCALE*0.6},${SCALE*0.4}`}/>;})()}
+            {(()=>{const s1=ox+(C.length/2-C.svcLineDist)*SCALE;const s2=ox+(C.length/2+C.svcLineDist)*SCALE;return <><line x1={s1} y1={oy} x2={s1} y2={oy+ph} strokeWidth={SCALE*0.28}/><line x1={s2} y1={oy} x2={s2} y2={oy+ph} strokeWidth={SCALE*0.28}/></>;})()}
+            <line x1={ox} y1={oy+ph/2} x2={ox+(C.length/2-C.svcLineDist)*SCALE} y2={oy+ph/2} strokeWidth={SCALE*0.25}/>
+            <line x1={ox+(C.length/2+C.svcLineDist)*SCALE} y1={oy+ph/2} x2={ox+pw} y2={oy+ph/2} strokeWidth={SCALE*0.25}/>
+            <line x1={ox+pw/2} y1={oy} x2={ox+pw/2} y2={oy+ph} strokeWidth={SCALE*0.7} opacity="0.95"/>
+          </>)}
+          {courtType === 'netball' && (<>
+            <rect x={ox} y={oy} width={pw} height={ph} strokeWidth={SCALE*0.35}/>
+            <line x1={ox+C.thirdDist*SCALE} y1={oy} x2={ox+C.thirdDist*SCALE} y2={oy+ph} strokeWidth={SCALE*0.28}/>
+            <line x1={ox+pw-C.thirdDist*SCALE} y1={oy} x2={ox+pw-C.thirdDist*SCALE} y2={oy+ph} strokeWidth={SCALE*0.28}/>
+            <circle cx={ox+pw/2} cy={oy+ph/2} r={C.centerCircleR*SCALE} stroke={getCol('centerCircle')} strokeWidth={SCALE*0.28}/>
+            <circle cx={ox} cy={oy+ph/2} r={C.goalCircleR*SCALE} stroke={getCol('goalCircles')} strokeWidth={SCALE*0.35}/>
+            <circle cx={ox+pw} cy={oy+ph/2} r={C.goalCircleR*SCALE} stroke={getCol('goalCircles')} strokeWidth={SCALE*0.35}/>
+            <line x1={ox+pw/2} y1={oy} x2={ox+pw/2} y2={oy+ph} strokeWidth={SCALE*0.5} opacity="0.9"/>
+          </>)}
+          {courtType === 'basketball' && (<>
+            <rect x={ox} y={oy} width={pw} height={ph} strokeWidth={SCALE*0.35}/>
+            <circle cx={ox+pw/2} cy={oy+ph/2} r={C.centerCircleR*SCALE} strokeWidth={SCALE*0.28}/>
+            <line x1={ox+pw/2} y1={oy} x2={ox+pw/2} y2={oy+ph} strokeWidth={SCALE*0.28}/>
+            {(()=>{const kw=C.keyWidth*SCALE;const kd=C.keyDepth*SCALE;const ky1=oy+(ph-kw)/2;return <><rect x={ox} y={ky1} width={kd} height={kw} strokeWidth={SCALE*0.28}/><rect x={ox+pw-kd} y={ky1} width={kd} height={kw} strokeWidth={SCALE*0.28}/></>;})()}
+          </>)}
+          {courtType === 'pickleball' && (<>
+            <rect x={ox} y={oy} width={pw} height={ph} strokeWidth={SCALE*0.35}/>
+            <line x1={ox+pw/2} y1={oy} x2={ox+pw/2} y2={oy+ph} strokeWidth={SCALE*0.7} opacity="0.95"/>
+            <line x1={ox+pw/2-C.nvzDepth*SCALE} y1={oy} x2={ox+pw/2-C.nvzDepth*SCALE} y2={oy+ph} strokeWidth={SCALE*0.28}/>
+            <line x1={ox+pw/2+C.nvzDepth*SCALE} y1={oy} x2={ox+pw/2+C.nvzDepth*SCALE} y2={oy+ph} strokeWidth={SCALE*0.28}/>
+          </>)}
+          {courtType === 'futsal' && (<>
+            <rect x={ox} y={oy} width={pw} height={ph} strokeWidth={SCALE*0.35}/>
+            <line x1={ox+pw/2} y1={oy} x2={ox+pw/2} y2={oy+ph} strokeWidth={SCALE*0.28}/>
+            <circle cx={ox+pw/2} cy={oy+ph/2} r={C.centerCircleR*SCALE} strokeWidth={SCALE*0.28}/>
+          </>)}
+        </g>
+        <text x={cw/2} y={SCALE*1.2} fill="#fff" fontSize={SCALE*1.2} fontFamily="Montserrat,sans-serif" fontWeight="700" textAnchor="middle" opacity="0.9">{C.label}</text>
+        <text x={cw/2} y={SCALE*2.0} fill="rgba(255,255,255,0.6)" fontSize={SCALE*0.8} textAnchor="middle">{C.dims}</text>
       </svg>
     </div>
   );
@@ -92,10 +136,15 @@ function CourtPreview({ layout, inside, outside }) {
 
 function App() {
   const [court, setCourt] = useState('tennis');
-  const [colour, setColour] = useState('green');
+  const [zoneColours, setZoneColours] = useState({});
 
-  const layout = COURTS.find(c=>c.id===court);
-  const col = COLOURS.find(c=>c.id===colour);
+  useMemo(() => {
+    const zones = ZONES[court] || [];
+    const zc = {};
+    zones.forEach(z => { zc[z.id] = zoneColours[z.id] || z.def; });
+    if (JSON.stringify(zc) !== JSON.stringify(zoneColours)) setZoneColours(zc);
+  }, [court]);
+
   const QUOTE_URL = 'https://grandslam-quote-system.vercel.app';
 
   return (
@@ -104,29 +153,31 @@ function App() {
       <div className="embed-body">
         <div className="embed-label">1. Choose Your Court</div>
         <div className="court-types">
-          {COURTS.map(c=>(
+          {COURT_LIST.map(c=>(
             <button key={c.id} className={`ct-btn ${court===c.id?'selected':''}`} onClick={()=>setCourt(c.id)}>
               <span className="ct-icon">{c.icon}</span>{c.name}
             </button>
           ))}
         </div>
 
-        <div className="embed-label">2. Pick a Colour</div>
-        <div className="colour-picker">
-          {COLOURS.map(c=>(
-            <div key={c.id} className={`col-btn ${colour===c.id?'selected':''}`} onClick={()=>setColour(c.id)}>
-              <div className="col-dot" style={{background:c.hex}}></div>
-              <span className="col-name">{c.name}</span>
+        <div className="embed-label">2. Pick Colours</div>
+        {(ZONES[court] || []).map(zone => (
+          <div key={zone.id}>
+            <div className="zone-label">{zone.name}</div>
+            <div className="zone-swatches">
+              {COLOURS.map(c => (
+                <div key={c.id} className={`zone-dot ${zoneColours[zone.id]===c.id?'selected':''}`}
+                  style={{background:c.hex}} title={c.name}
+                  onClick={() => setZoneColours(zc => ({...zc, [zone.id]: zc[zone.id]===c.id?zone.def:c.id}))} />
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
 
         <div className="embed-label">3. Your Design</div>
-        <CourtPreview layout={layout} inside={col?.hex||'#4CAF50'} outside="#888" />
+        <CourtPreview courtType={court} zoneColours={zoneColours} />
 
-        <a href={QUOTE_URL} target="_blank" className="cta" rel="noreferrer">
-          🎾 Get Your Quote →
-        </a>
+        <a href={QUOTE_URL} target="_blank" className="cta" rel="noreferrer">🎾 Get Your Quote →</a>
       </div>
       <div className="embed-footer">Professional Sports Court Construction · Since 2008</div>
     </div>
